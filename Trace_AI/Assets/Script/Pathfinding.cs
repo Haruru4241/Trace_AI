@@ -1,23 +1,32 @@
-using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
+using System.Collections.Generic;
 
-public class Pathfinding
+public class Pathfinding : MonoBehaviour
 {
-    private const float SLOW_ZONE_COST_MULTIPLIER = 2.0f; // 저속 구역의 비용 배수
+    public Grid grid;
+    public Transform player;
+    public Transform aiObject;
 
-    public List<Node> FindPath(Vector3 startPos, Vector3 targetPos, Grid grid)
+    public List<Node> FindPath(Vector3 startPos, Vector3 targetPos)
     {
         Node startNode = grid.NodeFromWorldPoint(startPos);
         Node targetNode = grid.NodeFromWorldPoint(targetPos);
 
-        SortedSet<Node> openSet = new SortedSet<Node>(new NodeComparer());
+        List<Node> openSet = new List<Node>();
         HashSet<Node> closedSet = new HashSet<Node>();
         openSet.Add(startNode);
 
         while (openSet.Count > 0)
         {
-            Node currentNode = openSet.First();
+            Node currentNode = openSet[0];
+            for (int i = 1; i < openSet.Count; i++)
+            {
+                if (openSet[i].fCost < currentNode.fCost || (openSet[i].fCost == currentNode.fCost && openSet[i].hCost < currentNode.hCost))
+                {
+                    currentNode = openSet[i];
+                }
+            }
+
             openSet.Remove(currentNode);
             closedSet.Add(currentNode);
 
@@ -26,42 +35,30 @@ public class Pathfinding
                 return RetracePath(startNode, targetNode);
             }
 
-            foreach (Node neighbor in grid.GetNeighbors(currentNode))
+            foreach (Node neighbour in grid.GetNeighbours(currentNode))
             {
-                if (!neighbor.isWalkable || closedSet.Contains(neighbor))
-                    continue;
-
-                float newCostToNeighbor = currentNode.gCost + GetDistance(currentNode, neighbor);
-                if (neighbor.isSlowZone)
+                if (!neighbour.walkable || closedSet.Contains(neighbour))
                 {
-                    newCostToNeighbor *= SLOW_ZONE_COST_MULTIPLIER; // 저속 구역의 추가 비용 설정
+                    continue;
                 }
 
-                if (newCostToNeighbor < neighbor.gCost || !openSet.Contains(neighbor))
+                int newCostToNeighbour = currentNode.gCost + GetDistance(currentNode, neighbour);
+                if (newCostToNeighbour < neighbour.gCost || !openSet.Contains(neighbour))
                 {
-                    neighbor.gCost = newCostToNeighbor;
-                    neighbor.hCost = GetDistance(neighbor, targetNode);
-                    neighbor.parent = currentNode;
+                    neighbour.gCost = newCostToNeighbour;
+                    neighbour.hCost = GetDistance(neighbour, targetNode);
+                    neighbour.parent = currentNode;
 
-                    if (!openSet.Contains(neighbor))
-                        openSet.Add(neighbor);
+                    if (!openSet.Contains(neighbour))
+                        openSet.Add(neighbour);
                 }
             }
         }
+
         return null;
     }
 
-    private float GetDistance(Node nodeA, Node nodeB)
-    {
-        int dstX = Mathf.Abs(nodeA.gridX - nodeB.gridX);
-        int dstY = Mathf.Abs(nodeA.gridY - nodeB.gridY);
-
-        if (dstX > dstY)
-            return 14 * dstY + 10 * (dstX - dstY);
-        return 14 * dstX + 10 * (dstY - dstX);
-    }
-
-    private List<Node> RetracePath(Node startNode, Node endNode)
+    List<Node> RetracePath(Node startNode, Node endNode)
     {
         List<Node> path = new List<Node>();
         Node currentNode = endNode;
@@ -72,19 +69,17 @@ public class Pathfinding
             currentNode = currentNode.parent;
         }
         path.Reverse();
+
         return path;
     }
 
-    private class NodeComparer : IComparer<Node>
+    int GetDistance(Node nodeA, Node nodeB)
     {
-        public int Compare(Node x, Node y)
-        {
-            int compare = x.fCost.CompareTo(y.fCost);
-            if (compare == 0)
-            {
-                compare = x.hCost.CompareTo(y.hCost);
-            }
-            return compare;
-        }
+        int dstX = Mathf.Abs(nodeA.gridX - nodeB.gridX);
+        int dstY = Mathf.Abs(nodeA.gridY - nodeB.gridY);
+
+        if (dstX > dstY)
+            return 14 * dstY + 10 * (dstX - dstY);
+        return 14 * dstX + 10 * (dstY - dstX);
     }
 }

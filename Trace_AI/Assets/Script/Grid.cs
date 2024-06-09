@@ -3,15 +3,15 @@ using System.Collections.Generic;
 
 public class Grid : MonoBehaviour
 {
+    public LayerMask unwalkableMask;
     public Vector2 gridWorldSize;
     public float nodeRadius;
-    public LayerMask unwalkableMask;
-    public LayerMask slowZoneMask;
-    Node[,] grid;
-    float nodeDiameter;
+    public Node[,] grid;
+
+    public float nodeDiameter;
     int gridSizeX, gridSizeY;
 
-    void Start()
+    void Awake()
     {
         nodeDiameter = nodeRadius * 2;
         gridSizeX = Mathf.RoundToInt(gridWorldSize.x / nodeDiameter);
@@ -30,27 +30,15 @@ public class Grid : MonoBehaviour
             {
                 Vector3 worldPoint = worldBottomLeft + Vector3.right * (x * nodeDiameter + nodeRadius) + Vector3.forward * (y * nodeDiameter + nodeRadius);
                 bool walkable = !(Physics.CheckSphere(worldPoint, nodeRadius, unwalkableMask));
-                bool slowZone = Physics.CheckSphere(worldPoint, nodeRadius, slowZoneMask);
-                grid[x, y] = new Node(worldPoint, walkable, slowZone, x, y);
+                grid[x, y] = new Node(walkable, worldPoint, x, y);
             }
         }
     }
 
-    public Node NodeFromWorldPoint(Vector3 worldPosition)
+    public List<Node> GetNeighbours(Node node)
     {
-        float percentX = (worldPosition.x + gridWorldSize.x / 2) / gridWorldSize.x;
-        float percentY = (worldPosition.z + gridWorldSize.y / 2) / gridWorldSize.y;
-        percentX = Mathf.Clamp01(percentX);
-        percentY = Mathf.Clamp01(percentY);
+        List<Node> neighbours = new List<Node>();
 
-        int x = Mathf.RoundToInt((gridSizeX - 1) * percentX);
-        int y = Mathf.RoundToInt((gridSizeY - 1) * percentY);
-        return grid[x, y];
-    }
-
-    public List<Node> GetNeighbors(Node node)
-    {
-        List<Node> neighbors = new List<Node>();
         for (int x = -1; x <= 1; x++)
         {
             for (int y = -1; y <= 1; y++)
@@ -63,10 +51,23 @@ public class Grid : MonoBehaviour
 
                 if (checkX >= 0 && checkX < gridSizeX && checkY >= 0 && checkY < gridSizeY)
                 {
-                    neighbors.Add(grid[checkX, checkY]);
+                    neighbours.Add(grid[checkX, checkY]);
                 }
             }
         }
-        return neighbors;
+
+        return neighbours;
+    }
+
+    public Node NodeFromWorldPoint(Vector3 worldPosition)
+    {
+        float percentX = (worldPosition.x + gridWorldSize.x / 2) / gridWorldSize.x;
+        float percentY = (worldPosition.z + gridWorldSize.y / 2) / gridWorldSize.y;
+        percentX = Mathf.Clamp01(percentX);
+        percentY = Mathf.Clamp01(percentY);
+
+        int x = Mathf.RoundToInt((gridSizeX - 1) * percentX);
+        int y = Mathf.RoundToInt((gridSizeY - 1) * percentY);
+        return grid[x, y];
     }
 }

@@ -2,22 +2,35 @@ using UnityEngine;
 
 public class Node
 {
-    public Vector3 position;
-    public bool isWalkable;
-    public bool isSlowZone;
-    public Node parent;
-    public float gCost;
-    public float hCost;
-    public float fCost { get { return gCost + hCost; } }
+    public Vector3 worldPosition;
+    public bool walkable;
     public int gridX;
     public int gridY;
 
-    public Node(Vector3 pos, bool walkable, bool slowZone, int gridX, int gridY)
+    public int gCost;
+    public int hCost;
+    public Node parent;
+
+    public Node(bool _walkable, Vector3 _worldPos, int _gridX, int _gridY)
     {
-        position = pos;
-        isWalkable = walkable;
-        isSlowZone = slowZone;
-        this.gridX = gridX;
-        this.gridY = gridY;
+        walkable = _walkable;
+        worldPosition = _worldPos;
+        gridX = _gridX;
+        gridY = _gridY;
+    }
+
+    public int fCost
+    {
+        get { return gCost + hCost; }
+    }
+
+    public int CompareTo(Node other)
+    {
+        int compare = fCost.CompareTo(other.fCost);
+        if (compare == 0)
+        {
+            compare = hCost.CompareTo(other.hCost);
+        }
+        return -compare;
     }
 }
