@@ -3,7 +3,6 @@ using UnityEngine;
 public class Node
 {
     public Vector3 worldPosition;
-    public bool walkable;
     public int gridX;
     public int gridY;
 
@@ -11,17 +10,19 @@ public class Node
     public int hCost;
     public Node parent;
 
-    public Node(bool _walkable, Vector3 _worldPos, int _gridX, int _gridY)
+    public int movementPenalty;
+
+    public Node(Vector3 _worldPos, int _gridX, int _gridY, int _movementPenalty)
     {
-        walkable = _walkable;
         worldPosition = _worldPos;
         gridX = _gridX;
         gridY = _gridY;
+        movementPenalty = _movementPenalty;
     }
 
     public int fCost
     {
-        get { return gCost + hCost; }
+        get { return gCost + hCost + movementPenalty; }
     }
 
     public int CompareTo(Node other)

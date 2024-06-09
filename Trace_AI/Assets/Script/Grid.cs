@@ -4,8 +4,13 @@ using System.Collections.Generic;
 public class Grid : MonoBehaviour
 {
     public LayerMask unwalkableMask;
+    public LayerMask slowZoneMask;
     public Vector2 gridWorldSize;
     public float nodeRadius;
+    public int defaultPenalty = 1;
+    public int unwalkablePenalty = 1000000; // 매우 높은 가중치로 설정
+    public int slowZonePenalty = 10;
+
     public Node[,] grid;
 
     public float nodeDiameter;
@@ -29,8 +34,21 @@ public class Grid : MonoBehaviour
             for (int y = 0; y < gridSizeY; y++)
             {
                 Vector3 worldPoint = worldBottomLeft + Vector3.right * (x * nodeDiameter + nodeRadius) + Vector3.forward * (y * nodeDiameter + nodeRadius);
-                bool walkable = !(Physics.CheckSphere(worldPoint, nodeRadius, unwalkableMask));
-                grid[x, y] = new Node(walkable, worldPoint, x, y);
+                int movementPenalty = defaultPenalty;
+
+                Ray ray = new Ray(worldPoint + Vector3.up * 50, Vector3.down);
+                RaycastHit hit;
+
+                if (Physics.Raycast(ray, out hit, 100, unwalkableMask))
+                {
+                    movementPenalty = unwalkablePenalty;
+                }
+                else if (Physics.Raycast(ray, out hit, 100, slowZoneMask))
+                {
+                    movementPenalty = slowZonePenalty;
+                }
+
+                grid[x, y] = new Node(worldPoint, x, y, movementPenalty);
             }
         }
     }

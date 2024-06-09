@@ -4,8 +4,6 @@ using System.Collections.Generic;
 public class Pathfinding : MonoBehaviour
 {
     public Grid grid;
-    public Transform player;
-    public Transform aiObject;
 
     public List<Node> FindPath(Vector3 startPos, Vector3 targetPos)
     {
@@ -37,12 +35,12 @@ public class Pathfinding : MonoBehaviour
 
             foreach (Node neighbour in grid.GetNeighbours(currentNode))
             {
-                if (!neighbour.walkable || closedSet.Contains(neighbour))
+                if (neighbour.movementPenalty >= 10000 || closedSet.Contains(neighbour))
                 {
                     continue;
                 }
 
-                int newCostToNeighbour = currentNode.gCost + GetDistance(currentNode, neighbour);
+                int newCostToNeighbour = currentNode.gCost + GetDistance(currentNode, neighbour) + neighbour.movementPenalty;
                 if (newCostToNeighbour < neighbour.gCost || !openSet.Contains(neighbour))
                 {
                     neighbour.gCost = newCostToNeighbour;

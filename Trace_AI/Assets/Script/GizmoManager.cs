@@ -27,7 +27,6 @@ public class GizmoManager : MonoBehaviour
                 Gizmos.color = Color.black;
                 Vector3 gizmoPosition = new Vector3(n.worldPosition.x, 1, n.worldPosition.z);
                 Gizmos.DrawCube(gizmoPosition, Vector3.one * (pathfinding.grid.nodeDiameter - .1f));
-                Debug.Log($"Gizmo drawn at position: {gizmoPosition}, AI position: {aiObject.position}, Player position: {player.position}");
 
                 // 이전 위치에서 현재 위치로 선을 그립니다.
                 Gizmos.DrawLine(previousPosition, gizmoPosition);

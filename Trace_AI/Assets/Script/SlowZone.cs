@@ -4,7 +4,7 @@ public class SlowZone : MonoBehaviour
 {
     private void OnTriggerEnter(Collider other)
     {
-        EnemyAI enemyAI = other.GetComponent<EnemyAI>();
+        EnemyAI1 enemyAI = other.GetComponent<EnemyAI1>();
         if (enemyAI != null)
         {
             enemyAI.SetMoveSpeed(enemyAI.moveSpeed / 2);
@@ -19,7 +19,7 @@ public class SlowZone : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        EnemyAI enemyAI = other.GetComponent<EnemyAI>();
+        EnemyAI1 enemyAI = other.GetComponent<EnemyAI1>();
         if (enemyAI != null)
         {
             enemyAI.ResetMoveSpeed();
