@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-public class EnemyAI1 : MonoBehaviour
+public class EnemyAI4 : MonoBehaviour
 {
     public Transform player; // 플레이어의 Transform 참조
     public float moveSpeed = 5f;
@@ -14,17 +14,27 @@ public class EnemyAI1 : MonoBehaviour
     private float nextDirectionChangeTime; // 다음 방향 변경 시간
     private Renderer renderer; // Renderer 컴포넌트 참조
 
-    public Pathfinding pathfinding; // Pathfinding 스크립트 참조
-    private List<Node> currentPath; // 현재 경로 저장
-    private GizmoManager gizmoManager; // GizmoManager 참조
+    public Pathfinding4 pathfinding4; // Pathfinding4 스크립트 참조
+    private List<Node4> currentPath; // 현재 경로 저장
 
     void Start()
     {
         originalMoveSpeed = moveSpeed;
         wanderDirection = GetRandomDirection(); // 초기 랜덤 방향 설정
         renderer = GetComponent<Renderer>(); // Renderer 컴포넌트 가져오기
-        gizmoManager = FindObjectOfType<GizmoManager>(); // GizmoManager 찾기
         StartCoroutine(UpdatePath());
+    }
+
+    void Update()
+    {
+        if (currentPath != null && currentPath.Count > 0)
+        {
+            FollowPlayer();
+        }
+        else
+        {
+            WanderAround();
+        }
     }
 
     IEnumerator UpdatePath()
@@ -34,19 +44,12 @@ public class EnemyAI1 : MonoBehaviour
             float distance = Vector3.Distance(transform.position, player.position);
             if (distance < trackingDistance)
             {
-                currentPath = pathfinding.FindPath(transform.position, player.position); // 경로 찾기
+                currentPath = pathfinding4.FindPath(transform.position, player.position); // 경로 찾기
                 renderer.material.color = Color.red; // 플레이어가 범위 내에 있으면 빨간색
-                if (gizmoManager != null)
-                {
-                    gizmoManager.pathfinding = pathfinding;
-                    gizmoManager.player = player;
-                    gizmoManager.aiObject = transform;
-                }
             }
             else
             {
                 currentPath = null; // 경로 초기화
-                WanderAround();
                 renderer.material.color = Color.green; // 플레이어가 범위 밖에 있으면 초록색
             }
             yield return new WaitForSeconds(1f); // 1초마다 경로 갱신

@@ -1464,13 +1464,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 1559853901}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 238af43cff21a8544b74bc06d49d5c47, type: 3}
+  m_Script: {fileID: 11500000, guid: c9bfa305678e2fd44a1d30468b52136b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 676883832}
-  moveSpeed: 3
+  moveSpeed: 5
   trackingDistance: 10
-  pathfinding: {fileID: 1719365075}
+  pathfinding5: {fileID: 1719365078}
 --- !u!1 &1596286847
 GameObject:
   m_ObjectHideFlags: 0
@@ -1684,9 +1684,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1719365077}
-  - component: {fileID: 1719365076}
-  - component: {fileID: 1719365075}
-  - component: {fileID: 1719365074}
+  - component: {fileID: 1719365080}
+  - component: {fileID: 1719365079}
+  - component: {fileID: 1719365078}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -1694,58 +1694,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1719365074
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1719365073}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 15bd5337c7a7d8d46ae4167f2727f919, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  unwalkableMask:
-    serializedVersion: 2
-    m_Bits: 256
-  slowZoneMask:
-    serializedVersion: 2
-    m_Bits: 512
-  gridWorldSize: {x: 30, y: 30}
-  nodeRadius: 0.5
-  defaultPenalty: 1
-  unwalkablePenalty: 2147483647
-  slowZonePenalty: 7
-  nodeDiameter: 0.5
---- !u!114 &1719365075
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1719365073}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 58b75fadcd688494783d8a5692fd8c39, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  grid: {fileID: 1719365074}
---- !u!114 &1719365076
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1719365073}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6d2bed4764fd1ba4894cbbea57faa03b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  pathfinding: {fileID: 1719365075}
-  player: {fileID: 676883832}
-  aiObject: {fileID: 1559853902}
 --- !u!4 &1719365077
 Transform:
   m_ObjectHideFlags: 0
@@ -1761,6 +1709,58 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1719365078
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1719365073}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52bfb6daaa4ba654c8afd8ca07284b3e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  grid5: {fileID: 1719365080}
+--- !u!114 &1719365079
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1719365073}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e831133e8a514841ad356179b699cd0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pathfinding5: {fileID: 1719365078}
+  player: {fileID: 676883832}
+  aiObject: {fileID: 1559853902}
+--- !u!114 &1719365080
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1719365073}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07da9523b39080f47a560cf7c28c7985, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unwalkableMask:
+    serializedVersion: 2
+    m_Bits: 256
+  slowZoneMask:
+    serializedVersion: 2
+    m_Bits: 512
+  gridWorldSize: {x: 30, y: 30}
+  nodeRadius: 0.5
+  defaultPenalty: 1
+  unwalkablePenalty: 100000
+  slowZonePenalty: 7
+  nodeDiameter: 0.5
 --- !u!1 &1881164744
 GameObject:
   m_ObjectHideFlags: 0
