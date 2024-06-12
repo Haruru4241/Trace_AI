@@ -1,5 +1,5 @@
 sceneSetups:
-- path: Assets/Scenes/Trace_7/No.7.unity
+- path: Assets/Scenes/Trace_8/No.8.unity
   isLoaded: 1
   isActive: 1
   isSubScene: 0

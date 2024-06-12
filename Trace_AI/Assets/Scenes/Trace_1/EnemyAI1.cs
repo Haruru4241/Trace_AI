@@ -1,3 +1,4 @@
+// EnemyAI1.cs
 using UnityEngine;
 
 public class EnemyAI1 : MonoBehaviour
@@ -65,6 +66,7 @@ public class EnemyAI1 : MonoBehaviour
         moveSpeed = originalMoveSpeed;
     }
 }
+
 
 
 /*

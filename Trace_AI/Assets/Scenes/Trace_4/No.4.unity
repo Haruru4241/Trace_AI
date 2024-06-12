@@ -1464,13 +1464,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 1559853901}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 238af43cff21a8544b74bc06d49d5c47, type: 3}
+  m_Script: {fileID: 11500000, guid: a55358544509adb47a4a9c7fddb44a63, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 676883832}
-  moveSpeed: 3
+  moveSpeed: 5
   trackingDistance: 10
-  pathfinding: {fileID: 0}
+  pathfinding4: {fileID: 1719365079}
 --- !u!1 &1596286847
 GameObject:
   m_ObjectHideFlags: 0
