@@ -8,7 +8,7 @@ public class Grid : MonoBehaviour
     public Vector2 gridWorldSize;
     public float nodeRadius;
     public int defaultPenalty = 1;
-    public int unwalkablePenalty = 1000000; // 매우 높은 가중치로 설정
+    public int unwalkablePenalty = 1000000;
     public int slowZonePenalty = 10;
 
     public Node[,] grid;
@@ -87,5 +87,12 @@ public class Grid : MonoBehaviour
         int x = Mathf.RoundToInt((gridSizeX - 1) * percentX);
         int y = Mathf.RoundToInt((gridSizeY - 1) * percentY);
         return grid[x, y];
+    }
+
+    public Vector3 GetRandomPoint()
+    {
+        int x = Random.Range(0, gridSizeX);
+        int y = Random.Range(0, gridSizeY);
+        return grid[x, y].worldPosition;
     }
 }

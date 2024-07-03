@@ -22,7 +22,7 @@ public class Node
 
     public int fCost
     {
-        get { return gCost + hCost + movementPenalty; }
+        get { return gCost + hCost; }
     }
 
     public int CompareTo(Node other)

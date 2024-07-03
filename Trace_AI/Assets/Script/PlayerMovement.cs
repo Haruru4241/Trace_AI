@@ -5,6 +5,8 @@ public class PlayerMovement : MonoBehaviour
     public float moveSpeed = 5.0f; // 플레이어의 이동 속도
     private float originalMoveSpeed;
 
+    private bool isMoving;
+
     void Start()
     {
         originalMoveSpeed = moveSpeed;
@@ -17,6 +19,13 @@ public class PlayerMovement : MonoBehaviour
 
         Vector3 movement = new Vector3(moveHorizontal, 0.0f, moveVertical);
         transform.position += movement * moveSpeed * Time.deltaTime; // 플레이어 위치 업데이트
+
+        isMoving = movement != Vector3.zero;
+    }
+
+    public bool IsMoving()
+    {
+        return isMoving;
     }
 
     public void SetMoveSpeed(float newSpeed)
