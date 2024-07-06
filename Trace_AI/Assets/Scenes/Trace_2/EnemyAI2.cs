@@ -10,13 +10,13 @@ public class EnemyAI2 : MonoBehaviour
     private Vector3 wanderDirection; // 랜덤 돌아다니기 방향
     private float directionChangeInterval = 3.0f; // 방향 변경 간격
     private float nextDirectionChangeTime; // 다음 방향 변경 시간
-    private Renderer renderer; // Renderer 컴포넌트 참조
+    private Renderer erenderer; // Renderer 컴포넌트 참조
 
     void Start()
     {
         originalMoveSpeed = moveSpeed;
         wanderDirection = GetRandomDirection(); // 초기 랜덤 방향 설정
-        renderer = GetComponent<Renderer>(); // Renderer 컴포넌트 가져오기
+        erenderer = GetComponent<Renderer>(); // Renderer 컴포넌트 가져오기
     }
 
     void Update()
@@ -25,12 +25,12 @@ public class EnemyAI2 : MonoBehaviour
         if (distance < trackingDistance)
         {
             FollowPlayer();
-            renderer.material.color = Color.red; // 플레이어가 범위 내에 있으면 빨간색
+            erenderer.material.color = Color.red; // 플레이어가 범위 내에 있으면 빨간색
         }
         else
         {
             WanderAround();
-            renderer.material.color = Color.green; // 플레이어가 범위 밖에 있으면 초록색
+            erenderer.material.color = Color.green; // 플레이어가 범위 밖에 있으면 초록색
         }
     }
 

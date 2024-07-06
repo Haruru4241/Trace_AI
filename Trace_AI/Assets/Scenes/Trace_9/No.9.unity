@@ -166,7 +166,7 @@ GameObject:
   - component: {fileID: 459810364}
   - component: {fileID: 459810363}
   - component: {fileID: 459810362}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Wall (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -293,7 +293,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1665329197}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &676883833
 BoxCollider:
@@ -406,6 +406,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 10
+  canMove: 1
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -543,7 +544,7 @@ GameObject:
   - component: {fileID: 863372548}
   - component: {fileID: 863372547}
   - component: {fileID: 863372546}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Wall (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -775,7 +776,7 @@ GameObject:
   - component: {fileID: 972885492}
   - component: {fileID: 972885491}
   - component: {fileID: 972885490}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Wall (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1291,9 +1292,10 @@ GameObject:
   - component: {fileID: 1559853903}
   - component: {fileID: 1559853907}
   - component: {fileID: 1559853913}
+  - component: {fileID: 1559853911}
   - component: {fileID: 1559853912}
   - component: {fileID: 1559853916}
-  - component: {fileID: 1559853911}
+  - component: {fileID: 1559853917}
   - component: {fileID: 1559853915}
   - component: {fileID: 1559853914}
   m_Layer: 0
@@ -1415,7 +1417,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 112
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!114 &1559853911
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1434,7 +1436,6 @@ MonoBehaviour:
   patrolThreshold: 50
   stateMaxValue: 200
   stateValue: 0
-  detectionValues: []
   availableStates: []
 --- !u!114 &1559853912
 MonoBehaviour:
@@ -1448,8 +1449,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 297f744f1837fdd428b9addae034eab6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  grid: {fileID: 1719365078}
-  player: {fileID: 676883832}
+  simplePath: 0
 --- !u!114 &1559853913
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1464,19 +1464,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   fsm: {fileID: 1559853911}
   trace: {fileID: 1559853912}
-  detection: {fileID: 0}
-  stateHandler: {fileID: 0}
+  detection: {fileID: 1559853917}
+  stateHandler: {fileID: 1559853912}
   targetPosition: {x: 0, y: 0, z: 0}
   player: {fileID: 676883832}
   moveSpeed: 5
   stateMaxValue: 200
-  renderer: {fileID: 1559853904}
-  patrolState: {fileID: 0}
-  pursueState: {fileID: 0}
+  erenderer: {fileID: 1559853904}
+  patrolState: {fileID: 1559853916}
+  pursueState: {fileID: 1559853912}
   stateDecrement: 1
   previousPosition: {x: 0, y: 0, z: 0}
   detections: []
   grid: {fileID: 1719365078}
+  initialStates: []
 --- !u!114 &1559853914
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1489,11 +1490,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c419eb77bc9fe6409a9438c8963fa5e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  visionRange: 10
-  viewAngle: 360
+  visionRange: 5
+  viewAngle: 60
   detectionLayerMask:
     serializedVersion: 2
-    m_Bits: 1024
+    m_Bits: 3072
+  Color: {r: 1, g: 0, b: 0, a: 1}
 --- !u!114 &1559853915
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1506,7 +1508,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76890e724029a214bbfbd238d4dd2a89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  soundRange: 5
+  soundRange: 15
+  Color: {r: 0, g: 0, b: 1, a: 1}
+  maxPathNodes: 5
+  detectionLayerMask:
+    serializedVersion: 2
+    m_Bits: 3072
 --- !u!114 &1559853916
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1519,10 +1526,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 223e4ff7cf31dd048a5acb93fffd1991, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  grid: {fileID: 1719365078}
-  player: {fileID: 676883832}
+  simplePath: 0
   patrolPoints: []
-  patrolIndex: 0
+  Color: {r: 0, g: 1, b: 0, a: 1}
+--- !u!114 &1559853917
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1559853901}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df7883078dc94de4d9d1a5d11dc51996, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1596286847
 GameObject:
   m_ObjectHideFlags: 0
@@ -1535,7 +1553,7 @@ GameObject:
   - component: {fileID: 1596286851}
   - component: {fileID: 1596286850}
   - component: {fileID: 1596286849}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Wall (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1657,7 +1675,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 676883832}
   - {fileID: 1559853902}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1823,6 +1840,7 @@ SceneRoots:
   - {fileID: 776917602}
   - {fileID: 972748033}
   - {fileID: 1301112598}
+  - {fileID: 676883832}
   - {fileID: 1665329197}
   - {fileID: 290365383}
   - {fileID: 1881164745}

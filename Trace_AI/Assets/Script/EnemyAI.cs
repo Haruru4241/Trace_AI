@@ -12,7 +12,7 @@ public class EnemyAI : MonoBehaviour
     private Vector3 wanderDirection; // 랜덤 돌아다니기 방향
     private float directionChangeInterval = 3.0f; // 방향 변경 간격
     private float nextDirectionChangeTime; // 다음 방향 변경 시간
-    private Renderer renderer; // Renderer 컴포넌트 참조
+    private Renderer erenderer; // Renderer 컴포넌트 참조
 
     public Pathfinding pathfinding; // Pathfinding 스크립트 참조
     private List<Node> currentPath; // 현재 경로 저장
@@ -22,7 +22,7 @@ public class EnemyAI : MonoBehaviour
     {
         originalMoveSpeed = moveSpeed;
         wanderDirection = GetRandomDirection(); // 초기 랜덤 방향 설정
-        renderer = GetComponent<Renderer>(); // Renderer 컴포넌트 가져오기
+        erenderer = GetComponent<Renderer>(); // Renderer 컴포넌트 가져오기
         gizmoManager = FindObjectOfType<GizmoManager>(); // GizmoManager 찾기
         StartCoroutine(UpdatePath());
     }
@@ -35,7 +35,7 @@ public class EnemyAI : MonoBehaviour
             if (distance < trackingDistance)
             {
                 currentPath = pathfinding.FindPath(transform.position, player.position); // 경로 찾기
-                renderer.material.color = Color.red; // 플레이어가 범위 내에 있으면 빨간색
+                erenderer.material.color = Color.red; // 플레이어가 범위 내에 있으면 빨간색
                 if (gizmoManager != null)
                 {
                     gizmoManager.pathfinding = pathfinding;
@@ -47,7 +47,7 @@ public class EnemyAI : MonoBehaviour
             {
                 currentPath = null; // 경로 초기화
                 WanderAround();
-                renderer.material.color = Color.green; // 플레이어가 범위 밖에 있으면 초록색
+                erenderer.material.color = Color.green; // 플레이어가 범위 밖에 있으면 초록색
             }
             yield return new WaitForSeconds(1f); // 1초마다 경로 갱신
         }

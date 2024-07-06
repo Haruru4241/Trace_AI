@@ -26,7 +26,7 @@ public class EnemyAI8 : MonoBehaviour
     private State previousState;
 
     private Dictionary<string, float> stateValues; // 상태값 딕셔너리
-    private Renderer renderer; // Renderer 컴포넌트 참조
+    private Renderer erenderer; // Renderer 컴포넌트 참조
     private Vector3 targetPosition; // 타겟 위치
     private GizmoManager8 gizmoManager; // GizmoManager8 참조
 
@@ -36,7 +36,7 @@ public class EnemyAI8 : MonoBehaviour
     void Start()
     {
         originalMoveSpeed = moveSpeed;
-        renderer = GetComponent<Renderer>(); // Renderer 컴포넌트 가져오기
+        erenderer = GetComponent<Renderer>(); // Renderer 컴포넌트 가져오기
         pathfinding8 = FindObjectOfType<Pathfinding8>(); // Pathfinding8 인스턴스 찾기
         gizmoManager = FindObjectOfType<GizmoManager8>(); // GizmoManager8 인스턴스 찾기
         patrolIndex = 0; // 초기 순찰 지점 인덱스 설정
@@ -288,7 +288,7 @@ public class EnemyAI8 : MonoBehaviour
         }
 
         float t = Mathf.InverseLerp(0, stateThreshold, stateValueSum);
-        renderer.material.color = Color.Lerp(Color.green, Color.red, t);
+        erenderer.material.color = Color.Lerp(Color.green, Color.red, t);
     }
 
     int GetClosestPatrolPointIndex(List<Vector3> points)

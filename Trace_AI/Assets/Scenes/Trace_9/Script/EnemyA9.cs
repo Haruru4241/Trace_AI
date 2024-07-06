@@ -27,7 +27,7 @@ public class EnemyAI9 : MonoBehaviour
     private State previousState;
 
     private Dictionary<string, float> stateValues;
-    private Renderer renderer;
+    private Renderer erenderer;
     private Vector3 targetPosition;
     private GizmoManager9 gizmoManager;
 
@@ -47,7 +47,7 @@ public class EnemyAI9 : MonoBehaviour
     void Start()
     {
         originalMoveSpeed = moveSpeed;
-        renderer = GetComponent<Renderer>();
+        erenderer = GetComponent<Renderer>();
         gizmoManager = FindObjectOfType<GizmoManager9>();
         patrolIndex = 0;
         stateValues = new Dictionary<string, float>
@@ -286,7 +286,7 @@ public class EnemyAI9 : MonoBehaviour
         }
 
         float t = Mathf.InverseLerp(0, stateThreshold, stateValueSum);
-        renderer.material.color = Color.Lerp(Color.green, Color.red, t);
+        erenderer.material.color = Color.Lerp(Color.green, Color.red, t);
     }
 
     int GetClosestPatrolPointIndex(List<Vector3> points)

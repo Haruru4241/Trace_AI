@@ -1,10 +1,32 @@
-using Map.Sample;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class Trace : MoveBase
 {
+
+    public override void Initialize(AI ai)
+    {
+
+    }
+
+    public override void Enter()
+    {
+        ai.HandleEvent("SetBehavior");
+    }
+
+    public override void Execute(FSM fsm)
+    {
+        if(fsm.stateValue >= fsm.chaseThreshold)
+        {
+            Exit();
+        }
+    }
+
+    public override void Exit()
+    {
+        Debug.Log("Exiting Patrol State");
+    }
+
     public override void UpdateTargetPosition(Vector3 currentPos, out Vector3 targetPos)
     {
         targetPos = player.position;

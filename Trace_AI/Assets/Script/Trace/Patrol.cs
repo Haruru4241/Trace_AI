@@ -4,10 +4,42 @@ using UnityEngine;
 public class Patrol : MoveBase
 {
     public List<Vector3> patrolPoints;
-    public int patrolIndex;
+    public Color Color=Color.green;
+    private int patrolIndex;
+
+    public override void Initialize(AI AI)
+    {
+        ai = AI;
+        // ¼øÂû ÁöÁ¡ »ý¼º
+        if (patrolPoints == null || patrolPoints.Count <= 1)
+        {
+            patrolPoints = GenerateRandomPatrolPoints(4);
+        }
+
+        // ¼øÂû ÀÎµ¦½º ÃÊ±âÈ­
+        patrolIndex = FindClosestPoint(transform.position, patrolPoints);
+    }
+
+    public override void Enter()
+    {
+        ai.HandleEvent("SetBehavior");
+    }
+
+    public override void Execute(FSM fsm)
+    {
+        if(fsm.stateValue < fsm.patrolThreshold)
+        {
+            Exit();
+        }
+    }
+
+    public override void Exit()
+    {
+        Debug.Log("Exiting Patrol State");
+    }
 
     public override void UpdateTargetPosition(Vector3 currentPos, out Vector3 targetPos)
-    {
+    { 
         patrolIndex = (patrolIndex + 1) % patrolPoints.Count;
         targetPos = patrolPoints[patrolIndex];
     }
@@ -30,36 +62,33 @@ public class Patrol : MoveBase
         }
     }
 
-    public List<Vector3> GenerateRandomPatrolPoints()
+    public List<Vector3> GenerateRandomPatrolPoints(int Count)
     {
         List<Vector3> points = new List<Vector3>();
-        for (int i = 0; i < 4; i++)
+
+        while (points.Count < Count)
         {
-            Vector3 point;
-            bool validPoint;
-            do
+            Vector3 point = grid.GetRandomPoint();
+
+            if (IsValidPatrolPoint(point, 1f))
             {
-                validPoint = true;
-                point = grid.GetRandomPoint();
-
-                foreach (var p in points)
-                {
-                    if (FindPath(p, point) == null)
-                    {
-                        validPoint = false;
-                        break;
-                    }
-                }
-
-                if (points.Count > 0 && FindPath(transform.position, point) == null)
-                {
-                    validPoint = false;
-                }
+                points.Add(point);
             }
-            while (!validPoint);
-
-            points.Add(point);
         }
         return points;
+    }
+
+
+
+    void OnDrawGizmos()
+    {
+        if (patrolPoints != null)
+        {
+            Gizmos.color = Color;
+            foreach (var point in patrolPoints)
+            {
+                Gizmos.DrawSphere(point, 0.2f);
+            }
+        }
     }
 }
