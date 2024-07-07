@@ -406,7 +406,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 10
-  canMove: 1
+  canMove: 0.5
+  movementSounds:
+  - {fileID: 8300000, guid: 2c90e80473cc930448770f8a996062cb, type: 3}
+  - {fileID: 8300000, guid: 9929892c95e88f24ea67533fdec16e2e, type: 3}
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -1478,6 +1481,14 @@ MonoBehaviour:
   detections: []
   grid: {fileID: 1719365078}
   initialStates: []
+  layerMasks:
+  - serializedVersion: 2
+    m_Bits: 1
+  - serializedVersion: 2
+    m_Bits: 256
+  - serializedVersion: 2
+    m_Bits: 512
+  penalties: 00000000a086010008000000
 --- !u!114 &1559853914
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1508,12 +1519,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76890e724029a214bbfbd238d4dd2a89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  soundRange: 15
-  Color: {r: 0, g: 0, b: 1, a: 1}
-  maxPathNodes: 5
+  hearingRange: 15
+  maxPathNodes: 50
   detectionLayerMask:
     serializedVersion: 2
     m_Bits: 3072
+  Color: {r: 0, g: 1, b: 0, a: 1}
 --- !u!114 &1559853916
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1788,17 +1799,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15bd5337c7a7d8d46ae4167f2727f919, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  unwalkableMask:
-    serializedVersion: 2
-    m_Bits: 256
-  slowZoneMask:
-    serializedVersion: 2
-    m_Bits: 512
+  layerMasks: []
+  penalties: 
   gridWorldSize: {x: 30, y: 30}
+  gridWorldSize2: {x: 0, y: 0}
   nodeRadius: 0.5
-  defaultPenalty: 1
-  unwalkablePenalty: 1000000
-  slowZonePenalty: 10
   nodeDiameter: 1
 --- !u!1 &1881164744
 GameObject:

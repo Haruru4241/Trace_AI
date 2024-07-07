@@ -14,7 +14,7 @@ public class FSM : MonoBehaviour
     public Dictionary<string, float> detectionTypeValueDict= new Dictionary<string, float>
     {
         { "VisionDetection", 10f },
-        { "SoundDetection", 5f }
+        { "SoundDetection", 50f }
     };
 
     public Dictionary<string, float> detectionObjectValueDict = new Dictionary<string, float>

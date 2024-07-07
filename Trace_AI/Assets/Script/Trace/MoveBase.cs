@@ -3,12 +3,12 @@ using System.Collections.Generic;
 
 public abstract class MoveBase : MonoBehaviour
 {
-    public bool simplePath=true;
-
+    public bool simplePath=false;
     protected Grid grid;
     protected Transform player;
     protected AI ai;
 
+    public Dictionary<int, int> layerPenalties = new Dictionary<int, int>();
     void Awake()
     {
         grid = FindObjectOfType<Grid>();
@@ -44,16 +44,16 @@ public abstract class MoveBase : MonoBehaviour
             }
 
             List<Node> neighbours = grid.GetNeighbours(currentNode);
-            Shuffle(neighbours);
+            //Shuffle(neighbours);
 
             foreach (Node neighbour in neighbours)
             {
-                if (neighbour.movementPenalty >= 10000 || closedSet.Contains(neighbour))
+                if (layerPenalties[neighbour.layerMask.value] >= 10000 || closedSet.Contains(neighbour))
                 {
                     continue;
                 }
 
-                int newCostToNeighbour = currentNode.gCost + GetDistance(currentNode, neighbour) + neighbour.movementPenalty;
+                int newCostToNeighbour = currentNode.gCost + GetDistance(currentNode, neighbour) + layerPenalties[neighbour.layerMask.value];
                 if (newCostToNeighbour < neighbour.gCost || !openSet.Contains(neighbour))
                 {
                     neighbour.gCost = newCostToNeighbour;
@@ -187,7 +187,7 @@ public abstract class MoveBase : MonoBehaviour
     public abstract void UpdateTargetPosition(Vector3 currentPos, out Vector3 targetPos);
     public abstract List<Node> UpdatePath(Vector3 currentPosition, Vector3 targetPosition);
     public abstract void HandleEvent(AI ai, string arrivalType);
-    public abstract void Initialize(AI ai);
+    public abstract void Initialize(AI ai, Dictionary<int, int> layerMask);
 
     public abstract void Enter();
 

@@ -38,7 +38,7 @@ public class VisionDetection : Detection
     {
         if (player != null)
         {
-            Gizmos.color = Color.yellow;
+            Gizmos.color = Color;
             Gizmos.DrawWireSphere(transform.position, visionRange);
 
             // 시야각을 시각적으로 표시
@@ -48,7 +48,6 @@ public class VisionDetection : Detection
             Vector3 leftRayDirection = leftRayRotation * forward;
             Vector3 rightRayDirection = rightRayRotation * forward;
 
-            Gizmos.color = Color;
             Gizmos.DrawLine(transform.position, transform.position + leftRayDirection * visionRange);
             Gizmos.DrawLine(transform.position, transform.position + rightRayDirection * visionRange);
         }

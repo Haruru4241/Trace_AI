@@ -32,14 +32,38 @@ public class AI : MonoBehaviour
 
     public List<MoveBase> initialStates;
 
+    public LayerMask[] layerMasks; // 레이어 마스크 배열
+    public int[] penalties; // 패널티 값 배열
+    
+
+    [System.Serializable]
+    public class LayerPenalty
+    {
+        public LayerMask layer;
+        public int penalty;
+    }
+    public LayerPenalty[] layerPenaltiesArray;
+    public Dictionary<int, int> layerPenalties = new Dictionary<int, int>(); // 레이어별 가중치
 
     void Start()
     {
+        for (int i = 0; i < layerMasks.Length; i++)
+        {
+            layerPenalties[layerMasks[i].value] = penalties[i];
+        }
+        /*        foreach (LayerPenalty layerPenalty in layerPenaltiesArray)
+                {
+                    int layer = layerPenalty.layer.value;
+                    if (!layerPenalties.ContainsKey(layer))
+                    {
+                        layerPenalties.Add(layer, layerPenalty.penalty);
+                    }
+                }*/
         initialStates = new List<MoveBase> { patrolState, pursueState };
         // 순찰 상태와 추적 상태 초기화
         foreach (var state in initialStates)
         {
-            state.Initialize(this);
+            state.Initialize(this, layerPenalties);
         }
         
 
@@ -61,6 +85,8 @@ public class AI : MonoBehaviour
     {
         { UpdateColor, true }
     };
+
+
 
         // 이전 위치 설정
         previousPosition = player.position;

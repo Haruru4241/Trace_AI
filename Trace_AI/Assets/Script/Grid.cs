@@ -3,22 +3,23 @@ using System.Collections.Generic;
 
 public class Grid : MonoBehaviour
 {
-    public LayerMask unwalkableMask;
-    public LayerMask slowZoneMask;
+    public LayerMask layerMasks; // 레이어 마스크 배열
+
     public Vector2 gridWorldSize;
-    public float nodeRadius;
-    public int defaultPenalty = 1;
-    public int unwalkablePenalty = 1000000;
-    public int slowZonePenalty = 10;
+    public Transform worldObject;
+    public float nodeDiameter=1f;
 
     public Node[,] grid;
 
-    public float nodeDiameter;
     int gridSizeX, gridSizeY;
 
     void Awake()
     {
-        nodeDiameter = nodeRadius * 2;
+        if (worldObject != null)
+        {
+            Vector3 objectSize = worldObject.GetComponent<Renderer>().bounds.size; // 객체의 크기 가져오기
+            gridWorldSize = new Vector2(objectSize.x, objectSize.z); // X, Z 크기를 사용하여 2D 크기 설정
+        }
         gridSizeX = Mathf.RoundToInt(gridWorldSize.x / nodeDiameter);
         gridSizeY = Mathf.RoundToInt(gridWorldSize.y / nodeDiameter);
         CreateGrid();
@@ -33,22 +34,19 @@ public class Grid : MonoBehaviour
         {
             for (int y = 0; y < gridSizeY; y++)
             {
-                Vector3 worldPoint = worldBottomLeft + Vector3.right * (x * nodeDiameter + nodeRadius) + Vector3.forward * (y * nodeDiameter + nodeRadius);
-                int movementPenalty = defaultPenalty;
+                Vector3 worldPoint = worldBottomLeft + Vector3.right * (x * nodeDiameter + nodeDiameter / 2) + Vector3.forward * (y * nodeDiameter + nodeDiameter/2);
+                LayerMask layerMask=0;
 
                 Ray ray = new Ray(worldPoint + Vector3.up * 50, Vector3.down);
                 RaycastHit hit;
 
-                if (Physics.Raycast(ray, out hit, 100, unwalkableMask))
+                if (Physics.Raycast(ray, out hit, 100, layerMasks))
                 {
-                    movementPenalty = unwalkablePenalty;
+                    layerMask = hit.collider.gameObject.layer;
                 }
-                else if (Physics.Raycast(ray, out hit, 100, slowZoneMask))
-                {
-                    movementPenalty = slowZonePenalty;
-                }
+                layerMask= (LayerMask)(1 << layerMask);
 
-                grid[x, y] = new Node(worldPoint, x, y, movementPenalty);
+                grid[x, y] = new Node(worldPoint, x, y, layerMask);
             }
         }
     }
