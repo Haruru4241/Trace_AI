@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class FSM : MonoBehaviour
@@ -39,12 +40,6 @@ public class FSM : MonoBehaviour
         ai.HandleEvent("SetBehavior");
     }
 
-    public void SetState(MoveBase newStateHandler)
-    {
-        PreviousState = currentState;
-        currentState = newStateHandler;
-    }
-
     public void DetectUpdate(Dictionary<string, List<Transform>> detectedObjects)
     {
         List<string> detectionTypes = new List<string>(detectedObjects.Keys);
@@ -62,28 +57,16 @@ public class FSM : MonoBehaviour
         stateValue = Mathf.Clamp(stateValue, 0, stateMaxValue);
     }
 
-    public bool CheckStateTransition()
+    public void SetState<T>() where T : MoveBase
     {
-        if (currentState is not Trace && stateValue >= chaseThreshold)
-        {
-            SetState(ai.pursueState);
-            ai.HandleEvent("SetBehavior");
-            return true;
-        }
-        else if (currentState is not Patrol && stateValue <= patrolThreshold)
-        {
-            SetState(ai.patrolState);
-            ai.HandleEvent("SetBehavior");
-            return true;
-        }
-        return false;
+        currentState = availableStates.OfType<T>().FirstOrDefault();
+        currentState.Enter();
     }
 
     public void UpdateFSM(Dictionary<string, List<Transform>> DetectedObjects, float stateDecrement)
     {
         stateValue -= stateDecrement;
         DetectUpdate(DetectedObjects);
-        CheckStateTransition();
-        //currentState?.Execute(this);
+        currentState?.Execute();
     }
 }

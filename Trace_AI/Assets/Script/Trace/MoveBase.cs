@@ -7,12 +7,15 @@ public abstract class MoveBase : MonoBehaviour
     protected Grid grid;
     protected Transform player;
     protected AI ai;
+    protected FSM fsm;
 
     public Dictionary<int, int> layerPenalties = new Dictionary<int, int>();
     void Awake()
     {
+        ai = gameObject.GetComponent<AI>();
         grid = FindObjectOfType<Grid>();
         player = FindObjectOfType<PlayerMovement>().transform;
+        fsm = GetComponent<FSM>();
     }
 
     public List<Node> FindPath(Vector3 startPos, Vector3 targetPos)
@@ -184,14 +187,17 @@ public abstract class MoveBase : MonoBehaviour
         }
     }
 
-    public abstract void UpdateTargetPosition(Vector3 currentPos, out Vector3 targetPos);
-    public abstract List<Node> UpdatePath(Vector3 currentPosition, Vector3 targetPosition);
-    public abstract void HandleEvent(AI ai, string arrivalType);
+    public abstract void UpdateTargetPosition(Vector3 currentPosition, ref Vector3 targetPosition);
+    
+    public abstract void UpdatePath(Vector3 currentPosition, Vector3 targetPosition, ref List<Node> currentPath);
+
+    public abstract void HandleEvent(ref Vector3 targetPosition, ref List<Node> currentPath, string arrivalType);
+    
     public abstract void Initialize(AI ai, Dictionary<int, int> layerMask);
 
     public abstract void Enter();
 
-    public abstract void Execute(FSM fsm);
+    public abstract void Execute();
 
     public abstract void Exit();
 }

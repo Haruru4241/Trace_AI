@@ -26,9 +26,9 @@ public class Patrol : MoveBase
         ai.HandleEvent("SetBehavior");
     }
 
-    public override void Execute(FSM fsm)
+    public override void Execute()
     {
-        if(fsm.stateValue < fsm.patrolThreshold)
+        if(fsm.stateValue > fsm.chaseThreshold)
         {
             Exit();
         }
@@ -36,30 +36,29 @@ public class Patrol : MoveBase
 
     public override void Exit()
     {
-        Debug.Log("Exiting Patrol State");
+        fsm.SetState<Trace>();
     }
 
-    public override void UpdateTargetPosition(Vector3 currentPos, out Vector3 targetPos)
-    { 
+    public override void UpdateTargetPosition(Vector3 currentPos, ref Vector3 targetPos)
+    {
         patrolIndex = (patrolIndex + 1) % patrolPoints.Count;
         targetPos = patrolPoints[patrolIndex];
     }
 
-    public override List<Node> UpdatePath(Vector3 currentPosition, Vector3 targetPosition)
+    public override void UpdatePath(Vector3 currentPosition, Vector3 targetPosition, ref List<Node> currentPath)
     {
-        return FindPath(currentPosition, targetPosition);
+        currentPath = FindPath(currentPosition, targetPosition);
     }
-
-    public override void HandleEvent(AI ai, string arrivalType)
+    public override void HandleEvent(ref Vector3 targetPosition, ref List<Node> currentPath, string arrivalType)
     {
         if (arrivalType == "TargetPosition")
         {
-            UpdateTargetPosition(ai.transform.position, out ai.targetPosition);
-            ai.currentPath = UpdatePath(ai.transform.position, ai.targetPosition);
+            UpdateTargetPosition(transform.position, ref targetPosition);
+            UpdatePath(transform.position, targetPosition, ref currentPath);
         }
         else if (arrivalType == "PathNode")
         {
-            ai.currentPath = UpdatePath(ai.transform.position, ai.targetPosition);
+            UpdatePath(transform.position, targetPosition, ref currentPath);
         }
     }
 

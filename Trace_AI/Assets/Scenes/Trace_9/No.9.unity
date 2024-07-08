@@ -1298,7 +1298,6 @@ GameObject:
   - component: {fileID: 1559853911}
   - component: {fileID: 1559853912}
   - component: {fileID: 1559853916}
-  - component: {fileID: 1559853917}
   - component: {fileID: 1559853915}
   - component: {fileID: 1559853914}
   m_Layer: 0
@@ -1465,30 +1464,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 258aa9dfe4018dc4a9ee267e906b6f88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fsm: {fileID: 1559853911}
-  trace: {fileID: 1559853912}
-  detection: {fileID: 1559853917}
-  stateHandler: {fileID: 1559853912}
-  targetPosition: {x: 0, y: 0, z: 0}
-  player: {fileID: 676883832}
-  moveSpeed: 5
-  stateMaxValue: 200
-  erenderer: {fileID: 1559853904}
   patrolState: {fileID: 1559853916}
   pursueState: {fileID: 1559853912}
+  player: {fileID: 676883832}
+  moveSpeed: 5
   stateDecrement: 1
-  previousPosition: {x: 0, y: 0, z: 0}
-  detections: []
-  grid: {fileID: 1719365078}
-  initialStates: []
-  layerMasks:
-  - serializedVersion: 2
-    m_Bits: 1
-  - serializedVersion: 2
-    m_Bits: 256
-  - serializedVersion: 2
-    m_Bits: 512
-  penalties: 00000000a086010008000000
+  Detections:
+  - {fileID: 1559853915}
+  - {fileID: 1559853914}
+  MoveStates:
+  - {fileID: 1559853916}
+  - {fileID: 1559853912}
+  layerPenaltiesArray:
+  - layer:
+      serializedVersion: 2
+      m_Bits: 1
+    penalty: 0
+  - layer:
+      serializedVersion: 2
+      m_Bits: 256
+    penalty: 10000
+  - layer:
+      serializedVersion: 2
+      m_Bits: 512
+    penalty: 8
 --- !u!114 &1559853914
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1540,18 +1539,6 @@ MonoBehaviour:
   simplePath: 0
   patrolPoints: []
   Color: {r: 0, g: 1, b: 0, a: 1}
---- !u!114 &1559853917
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1559853901}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: df7883078dc94de4d9d1a5d11dc51996, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1596286847
 GameObject:
   m_ObjectHideFlags: 0
@@ -1799,11 +1786,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15bd5337c7a7d8d46ae4167f2727f919, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  layerMasks: []
-  penalties: 
+  layerMasks:
+    serializedVersion: 2
+    m_Bits: 769
   gridWorldSize: {x: 30, y: 30}
-  gridWorldSize2: {x: 0, y: 0}
-  nodeRadius: 0.5
+  worldObject: {fileID: 1130969298}
   nodeDiameter: 1
 --- !u!1 &1881164744
 GameObject:

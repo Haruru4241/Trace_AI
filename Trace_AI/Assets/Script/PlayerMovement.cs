@@ -43,8 +43,8 @@ public class PlayerMovement : MonoBehaviour
                     int randomIndex = Random.Range(0, movementSounds.Length); // ·£´ý ÀÎµ¦½º ¼±ÅÃ
                     audioSource.clip = movementSounds[randomIndex];
                     audioSource.Play();
+                    GameEventSystem.RaiseEvent(transform);
                 }
-                GameEventSystem.RaiseEvent(transform);
             }
         }
         else if (!isMoving && audioSource.isPlaying)

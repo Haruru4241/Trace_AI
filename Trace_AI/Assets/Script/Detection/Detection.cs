@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Detection : MonoBehaviour
+public abstract class Detection : MonoBehaviour
 {
     protected Transform aiTransform;
     protected Transform player;

@@ -5,36 +5,18 @@ using UnityEngine;
 
 public class AI : MonoBehaviour
 {
-    public FSM fsm;
-    public Trace trace;
-    public Detection detection;
-    public MoveBase stateHandler;
-    public Vector3 targetPosition;
-
-    public Transform player;
-    public float moveSpeed = 5f;
-    public float stateMaxValue = 200f;
-    public Renderer erenderer;
-    public List<Node> currentPath;
+    FSM fsm;
+    MoveBase stateHandler;
 
     public Patrol patrolState;
     public MoveBase pursueState;
 
+    public Transform player;
+    public float moveSpeed = 5f;
     public float stateDecrement = 1f;
 
-    public Vector3 previousPosition;
-
-    public List<Detection> detections = new List<Detection>();
-
-    public Grid grid;
-
-    public event Action<string> OnEventOccurred;
-
-    public List<MoveBase> initialStates;
-
-    public LayerMask[] layerMasks; // 레이어 마스크 배열
-    public int[] penalties; // 패널티 값 배열
-    
+    public List<Detection> Detections;
+    public List<MoveBase> MoveStates;
 
     [System.Serializable]
     public class LayerPenalty
@@ -42,41 +24,37 @@ public class AI : MonoBehaviour
         public LayerMask layer;
         public int penalty;
     }
-    public LayerPenalty[] layerPenaltiesArray;
-    public Dictionary<int, int> layerPenalties = new Dictionary<int, int>(); // 레이어별 가중치
+    [HideInInspector]
+    public List<LayerPenalty> layerPenaltiesArray; // 인스펙터 창에 노출될 리스트
+
+    public event Action<string> OnEventOccurred;
+    private Dictionary<int, int> layerPenalties = new Dictionary<int, int>(); // 레이어별 가중치
+    private Renderer AIrenderer;
+    private List<Node> currentPath;
+    private Vector3 targetPosition;
 
     void Start()
     {
-        for (int i = 0; i < layerMasks.Length; i++)
+        fsm = GetComponent<FSM>();
+        AIrenderer = GetComponent<Renderer>();
+        foreach (LayerPenalty layerPenalty in layerPenaltiesArray)
         {
-            layerPenalties[layerMasks[i].value] = penalties[i];
+            layerPenalties.Add(layerPenalty.layer.value, layerPenalty.penalty);
         }
-        /*        foreach (LayerPenalty layerPenalty in layerPenaltiesArray)
-                {
-                    int layer = layerPenalty.layer.value;
-                    if (!layerPenalties.ContainsKey(layer))
-                    {
-                        layerPenalties.Add(layer, layerPenalty.penalty);
-                    }
-                }*/
-        initialStates = new List<MoveBase> { patrolState, pursueState };
+
         // 순찰 상태와 추적 상태 초기화
-        foreach (var state in initialStates)
+        foreach (var state in MoveStates)
         {
             state.Initialize(this, layerPenalties);
         }
-        
 
-        // 감지 도구 설정
-        detections.AddRange(GetComponents<Detection>());
-
-        foreach (var detection in detections)
+        foreach (var detection in Detections)
         {
             detection.Initialize(transform, player);
         }
 
         // 상태 초기화
-        fsm.InitializeStates(initialStates);
+        fsm.InitializeStates(MoveStates);
 
         // 이벤트 처리기 설정
         OnEventOccurred += HandleEvent;
@@ -85,16 +63,11 @@ public class AI : MonoBehaviour
     {
         { UpdateColor, true }
     };
-
-
-
-        // 이전 위치 설정
-        previousPosition = player.position;
     }
 
     void Update()
     {
-        var detectedObjects = detection.DetectedObject(detections);
+        var detectedObjects = Detections[0].DetectedObject(Detections);
 
         fsm.UpdateFSM(detectedObjects, stateDecrement);
 
@@ -103,9 +76,6 @@ public class AI : MonoBehaviour
         MoveAlongPath();
 
         ExecuteAdditionalMethods();
-
-        previousPosition = player.position;
-
     }
 
     public void HandleEvent(string eventType)
@@ -114,14 +84,14 @@ public class AI : MonoBehaviour
         {
             case "SetBehavior":
                 stateHandler = fsm.currentState;
-                stateHandler.UpdateTargetPosition(transform.position, out targetPosition);
-                currentPath = stateHandler.UpdatePath(transform.position, targetPosition);
+                stateHandler.UpdateTargetPosition(transform.position, ref targetPosition);
+                stateHandler.UpdatePath(transform.position, targetPosition, ref currentPath);
                 break;
             case "TargetPosition":
-                stateHandler.HandleEvent(this, "TargetPosition");
+                stateHandler.HandleEvent(ref targetPosition, ref currentPath, "TargetPosition");
                 break;
             case "PathNode":
-                stateHandler.HandleEvent(this, "PathNode");
+                stateHandler.HandleEvent(ref targetPosition, ref currentPath, "PathNode");
                 break;
             default:
                 Debug.LogWarning($"Unhandled event type: {eventType}");
@@ -177,7 +147,7 @@ public class AI : MonoBehaviour
     {
         float stateValue = fsm.stateValue;
         float t = Mathf.InverseLerp(0, fsm.chaseThreshold, stateValue);
-        erenderer.material.color = Color.Lerp(Color.green, Color.red, t);
+        AIrenderer.material.color = Color.Lerp(Color.green, Color.red, t);
     }
 
     void OnDrawGizmos()
