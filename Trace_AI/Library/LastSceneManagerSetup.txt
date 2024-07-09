@@ -1,5 +1,5 @@
 sceneSetups:
-- path: Assets/Scenes/Trace_9/No.9.unity
+- path: Assets/Samples/AI Navigation/1.1.5/Build And Connect NavMesh Surfaces/Scenes/1_multiple_agent_sizes.unity
   isLoaded: 1
   isActive: 1
   isSubScene: 0

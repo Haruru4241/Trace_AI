@@ -1438,7 +1438,9 @@ MonoBehaviour:
   patrolThreshold: 50
   stateMaxValue: 200
   stateValue: 0
-  availableStates: []
+  availableStates:
+  - {fileID: 1559853916}
+  - {fileID: 1559853912}
 --- !u!114 &1559853912
 MonoBehaviour:
   m_ObjectHideFlags: 0
