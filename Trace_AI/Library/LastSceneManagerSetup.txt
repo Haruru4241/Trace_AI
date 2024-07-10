@@ -1,5 +1,5 @@
 sceneSetups:
-- path: Assets/Samples/AI Navigation/1.1.5/Build And Connect NavMesh Surfaces/Scenes/1_multiple_agent_sizes.unity
+- path: Assets/Samples/AI Navigation/1.1.5/Build And Connect NavMesh Surfaces/Scenes/4_sliding_window_infinite.unity
   isLoaded: 1
   isActive: 1
   isSubScene: 0

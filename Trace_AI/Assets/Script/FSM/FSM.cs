@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class FSM : MonoBehaviour
 {
-    public MoveBase PreviousState;
+    //public MoveBase PreviousState;
     public MoveBase currentState;
 
     public float chaseThreshold = 100f;
@@ -28,7 +28,7 @@ public class FSM : MonoBehaviour
         
     private AI ai;
 
-    void Start()
+    void Awake()
     {
         ai = GetComponent<AI>();
     }
@@ -37,7 +37,6 @@ public class FSM : MonoBehaviour
     {
         availableStates = states;
         currentState = availableStates[0];
-        ai.HandleEvent("SetBehavior");
     }
 
     public void DetectUpdate(Dictionary<string, List<Transform>> detectedObjects)

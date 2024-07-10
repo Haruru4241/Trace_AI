@@ -47,7 +47,6 @@ public abstract class MoveBase : MonoBehaviour
             }
 
             List<Node> neighbours = grid.GetNeighbours(currentNode);
-            //Shuffle(neighbours);
 
             foreach (Node neighbour in neighbours)
             {
@@ -84,7 +83,6 @@ public abstract class MoveBase : MonoBehaviour
         }
         path.Reverse();
 
-        if (simplePath) return SimplifyPath(path, 1);
         return path;
 
     }
@@ -94,45 +92,6 @@ public abstract class MoveBase : MonoBehaviour
 
         Collider[] hitColliders = Physics.OverlapSphere(point, Radius, obstacleMask);
         return hitColliders.Length == 0;
-    }
-
-    public List<Node> SimplifyPath(List<Node> path, float radius)
-    {
-        if (path == null || path.Count < 2) return path;
-
-        List<Node> simplifiedPath = new List<Node>();
-        simplifiedPath.Add(path[0]); // 첫 번째 노드는 무조건 추가
-
-        int currentIndex = 0;
-
-        while (currentIndex < path.Count - 1)
-        {
-            int nextIndex = currentIndex + 1;
-
-            while (nextIndex < path.Count - 1 && IsPathClear(path[currentIndex].worldPosition, path[nextIndex + 1].worldPosition, radius))
-            {
-                nextIndex++;
-            }
-
-            simplifiedPath.Add(path[nextIndex]);
-            currentIndex = nextIndex;
-        }
-
-        return simplifiedPath;
-    }
-
-    private bool IsPathClear(Vector3 start, Vector3 end, float radius)
-    {
-        Vector3 direction = (end - start).normalized;
-        float distance = Vector3.Distance(start, end);
-
-        // 레이캐스트를 사용하여 두 점 사이에 장애물이 있는지 확인
-        if (Physics.SphereCast(start, radius, direction, out RaycastHit hit, distance))
-        {
-            return false;
-        }
-
-        return true;
     }
 
     public int FindClosestPoint(Vector3 currentPosition, List<Vector3> points)
@@ -173,27 +132,13 @@ public abstract class MoveBase : MonoBehaviour
         aiTransform.rotation = Quaternion.Slerp(aiTransform.rotation, targetRotation, Time.deltaTime * 5f);
     }
 
-    private void Shuffle<T>(List<T> list)
-    {
-        System.Random rng = new System.Random();
-        int n = list.Count;
-        while (n > 1)
-        {
-            n--;
-            int k = rng.Next(n + 1);
-            T value = list[k];
-            list[k] = list[n];
-            list[n] = value;
-        }
-    }
-
     public abstract void UpdateTargetPosition(Vector3 currentPosition, ref Vector3 targetPosition);
     
     public abstract void UpdatePath(Vector3 currentPosition, Vector3 targetPosition, ref List<Node> currentPath);
 
     public abstract void HandleEvent(ref Vector3 targetPosition, ref List<Node> currentPath, string arrivalType);
     
-    public abstract void Initialize(AI ai, Dictionary<int, int> layerMask);
+    public abstract void Initialize();
 
     public abstract void Enter();
 

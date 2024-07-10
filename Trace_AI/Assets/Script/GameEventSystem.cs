@@ -13,10 +13,22 @@ public class GameEventArgs : EventArgs
 
 public static class GameEventSystem
 {
-    public static event EventHandler<GameEventArgs> OnGameEvent;
+    public static event EventHandler<GameEventArgs> OnSoundDetected;
+    public static event Action OnAiAdditionalEvent;
+    public static event Action<string> OnStateUpdateEvent;
 
-    public static void RaiseEvent(Transform source)
+    public static void RaiseSoundDetected(Transform source)
     {
-        OnGameEvent?.Invoke(null, new GameEventArgs(source));
+        OnSoundDetected?.Invoke(null, new GameEventArgs(source));
+    }
+
+    public static void RaiseAiAdditionalEvent()
+    {
+        OnAiAdditionalEvent?.Invoke();
+    }
+
+    public static void RaiseStateUpdateEvent(string eventType)
+    {
+        OnStateUpdateEvent?.Invoke(eventType);
     }
 }

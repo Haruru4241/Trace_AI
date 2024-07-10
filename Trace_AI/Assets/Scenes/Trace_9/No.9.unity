@@ -405,8 +405,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c67f1381ada8b2444967cb82fd402f93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 10
-  canMove: 0.5
+  baseMoveSpeed: 5
   movementSounds:
   - {fileID: 8300000, guid: 2c90e80473cc930448770f8a996062cb, type: 3}
   - {fileID: 8300000, guid: 9929892c95e88f24ea67533fdec16e2e, type: 3}
@@ -1432,7 +1431,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b9234f2bc27596846b241c777a8d9f79, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PreviousState: {fileID: 0}
   currentState: {fileID: 0}
   chaseThreshold: 100
   patrolThreshold: 50
@@ -1466,9 +1464,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 258aa9dfe4018dc4a9ee267e906b6f88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  patrolState: {fileID: 1559853916}
-  pursueState: {fileID: 1559853912}
-  player: {fileID: 676883832}
   moveSpeed: 5
   stateDecrement: 1
   Detections:
@@ -1502,11 +1497,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c419eb77bc9fe6409a9438c8963fa5e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  visionRange: 5
-  viewAngle: 60
   detectionLayerMask:
     serializedVersion: 2
     m_Bits: 3072
+  visionRange: 5
+  viewAngle: 60
   Color: {r: 1, g: 0, b: 0, a: 1}
 --- !u!114 &1559853915
 MonoBehaviour:
@@ -1520,11 +1515,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76890e724029a214bbfbd238d4dd2a89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hearingRange: 15
-  maxPathNodes: 50
   detectionLayerMask:
     serializedVersion: 2
     m_Bits: 3072
+  hearingRange: 15
+  maxPathNodes: 50
   Color: {r: 0, g: 1, b: 0, a: 1}
 --- !u!114 &1559853916
 MonoBehaviour:

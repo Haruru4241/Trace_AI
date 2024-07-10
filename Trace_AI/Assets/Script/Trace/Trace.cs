@@ -3,9 +3,9 @@ using UnityEngine;
 
 public class Trace : MoveBase
 {
-    public override void Initialize(AI ai, Dictionary<int, int> layerMask)
+    public override void Initialize()
     {
-        layerPenalties = layerMask;
+        layerPenalties = ai.layerPenalties;
     }
 
     public override void Enter()

@@ -1,10 +1,11 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public float moveSpeed = 5.0f; // 플레이어의 이동 속도
-    public float canMove = 0.5f;
-    private float originalMoveSpeed;
+    public float baseMoveSpeed = 5.0f; // 플레이어의 이동 속도
+    private float currentMoveSpeed; // 현재 이동 속도
+    private List<float> speedModifiers;
     private bool isMoving;
 
     private AudioSource audioSource;
@@ -13,9 +14,12 @@ public class PlayerMovement : MonoBehaviour
 
     void Start()
     {
-        originalMoveSpeed = moveSpeed;
+        speedModifiers = new List<float> { baseMoveSpeed };
+        UpdateMoveSpeed();
+
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.loop = false; // 발자국 소리를 반복하지 않도록 설정
+
         rb = gameObject.GetComponent<Rigidbody>();
         rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ | RigidbodyConstraints.FreezeRotationY;
     }
@@ -26,9 +30,7 @@ public class PlayerMovement : MonoBehaviour
         float moveVertical = Input.GetAxis("Vertical"); // 수직 이동 입력 받기
 
         Vector3 moveDirection = new Vector3(moveHorizontal, 0.0f, moveVertical).normalized;
-        float effectiveSpeed = moveSpeed;
-
-        Vector3 move = moveDirection * effectiveSpeed;
+        Vector3 move = moveDirection * currentMoveSpeed;
 
         rb.velocity = new Vector3(move.x, rb.velocity.y, move.z); // Rigidbody를 사용한 이동
 
@@ -43,7 +45,7 @@ public class PlayerMovement : MonoBehaviour
                     int randomIndex = Random.Range(0, movementSounds.Length); // 랜덤 인덱스 선택
                     audioSource.clip = movementSounds[randomIndex];
                     audioSource.Play();
-                    GameEventSystem.RaiseEvent(transform);
+                    GameEventSystem.RaiseSoundDetected(transform);
                 }
             }
         }
@@ -53,18 +55,36 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    private void UpdateMoveSpeed()
+    {
+        currentMoveSpeed = 1.0f;
+        foreach (float modifier in speedModifiers)
+        {
+            currentMoveSpeed *= modifier;
+        }
+    }
+
+    public void AddSpeedModifier(float modifier)
+    {
+        speedModifiers.Add(modifier);
+        UpdateMoveSpeed();
+    }
+
+    public void RemoveSpeedModifier(float modifier)
+    {
+        speedModifiers.Remove(modifier);
+        UpdateMoveSpeed();
+    }
+
+    public void ResetSpeedModifiers()
+    {
+        speedModifiers.Clear();
+        speedModifiers.Add(baseMoveSpeed);
+        UpdateMoveSpeed();
+    }
+
     public bool IsMoving()
     {
         return isMoving;
-    }
-
-    public void SetMoveSpeed(float newSpeed)
-    {
-        moveSpeed = newSpeed;
-    }
-
-    public void ResetMoveSpeed()
-    {
-        moveSpeed = originalMoveSpeed;
     }
 }

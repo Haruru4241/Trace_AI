@@ -1,15 +1,15 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public abstract class Detection : MonoBehaviour
 {
-    protected Transform aiTransform;
-    protected Transform player;
+    public LayerMask detectionLayerMask;
 
-    public void Initialize(Transform aiTransform, Transform playerTransform)
+    protected MoveBase moveBase;
+    void Awake()
     {
-        this.aiTransform = aiTransform;
-        this.player = playerTransform;
+        moveBase = GetComponent<MoveBase>();
     }
 
     public Dictionary<string, List<Transform>> DetectedObject(List<Detection> detections)

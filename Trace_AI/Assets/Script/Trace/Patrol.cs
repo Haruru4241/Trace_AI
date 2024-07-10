@@ -7,10 +7,9 @@ public class Patrol : MoveBase
     public Color Color=Color.green;
     private int patrolIndex;
 
-    public override void Initialize(AI AI, Dictionary<int, int> layerMask)
+    public override void Initialize()
     {
-        layerPenalties = layerMask;
-        ai = AI;
+        layerPenalties = ai.layerPenalties;
         // 순찰 지점 생성
         if (patrolPoints == null || patrolPoints.Count <= 1)
         {
@@ -77,8 +76,6 @@ public class Patrol : MoveBase
         }
         return points;
     }
-
-
 
     void OnDrawGizmos()
     {
