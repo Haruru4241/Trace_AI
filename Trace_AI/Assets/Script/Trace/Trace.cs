@@ -3,14 +3,9 @@ using UnityEngine;
 
 public class Trace : MoveBase
 {
-    public override void Initialize()
-    {
-        layerPenalties = ai.layerPenalties;
-    }
-
     public override void Enter()
     {
-        ai.HandleEvent("SetBehavior");
+        ai.SetTargetPosition(player.position);
     }
 
     public override void Execute()
@@ -26,24 +21,13 @@ public class Trace : MoveBase
         fsm.SetState<Patrol>();
     }
 
-    public override void UpdateTargetPosition(Vector3 currentPos, ref Vector3 targetPos)
+    public override Vector3 ArriveTargetPosition()
     {
-        targetPos = player.position;
+        return player.position;
     }
 
-    public override void UpdatePath(Vector3 currentPosition, Vector3 targetPosition, ref List<Node> currentPath)
+    public override Vector3 TraceTargetPosition()
     {
-        currentPath = FindPath(currentPosition, targetPosition);
+        return player.position;
     }
-
-    public override void HandleEvent(ref Vector3 targetPosition, ref List<Node> currentPath, string arrivalType)
-    {
-        if (arrivalType == "TargetPosition" || arrivalType == "PathNode")
-        {
-            UpdateTargetPosition(transform.position, ref targetPosition);
-            UpdatePath(transform.position, targetPosition, ref currentPath);
-        }
-    }
-
-
 }

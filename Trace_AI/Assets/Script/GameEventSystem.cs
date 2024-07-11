@@ -15,7 +15,6 @@ public static class GameEventSystem
 {
     public static event EventHandler<GameEventArgs> OnSoundDetected;
     public static event Action OnAiAdditionalEvent;
-    public static event Action<string> OnStateUpdateEvent;
 
     public static void RaiseSoundDetected(Transform source)
     {
@@ -25,10 +24,5 @@ public static class GameEventSystem
     public static void RaiseAiAdditionalEvent()
     {
         OnAiAdditionalEvent?.Invoke();
-    }
-
-    public static void RaiseStateUpdateEvent(string eventType)
-    {
-        OnStateUpdateEvent?.Invoke(eventType);
     }
 }

@@ -7,10 +7,8 @@ public class Patrol : MoveBase
     public Color Color=Color.green;
     private int patrolIndex;
 
-    public override void Initialize()
+    void Start()
     {
-        layerPenalties = ai.layerPenalties;
-        // 순찰 지점 생성
         if (patrolPoints == null || patrolPoints.Count <= 1)
         {
             patrolPoints = GenerateRandomPatrolPoints(4);
@@ -22,7 +20,8 @@ public class Patrol : MoveBase
 
     public override void Enter()
     {
-        ai.HandleEvent("SetBehavior");
+        patrolIndex = FindClosestPoint(transform.position, patrolPoints);
+        ai.SetTargetPosition(patrolPoints[patrolIndex]);
     }
 
     public override void Execute()
@@ -38,27 +37,15 @@ public class Patrol : MoveBase
         fsm.SetState<Trace>();
     }
 
-    public override void UpdateTargetPosition(Vector3 currentPos, ref Vector3 targetPos)
+    public override Vector3 ArriveTargetPosition()
     {
         patrolIndex = (patrolIndex + 1) % patrolPoints.Count;
-        targetPos = patrolPoints[patrolIndex];
+        return patrolPoints[patrolIndex];
     }
 
-    public override void UpdatePath(Vector3 currentPosition, Vector3 targetPosition, ref List<Node> currentPath)
+    public override Vector3 TraceTargetPosition()
     {
-        currentPath = FindPath(currentPosition, targetPosition);
-    }
-    public override void HandleEvent(ref Vector3 targetPosition, ref List<Node> currentPath, string arrivalType)
-    {
-        if (arrivalType == "TargetPosition")
-        {
-            UpdateTargetPosition(transform.position, ref targetPosition);
-            UpdatePath(transform.position, targetPosition, ref currentPath);
-        }
-        else if (arrivalType == "PathNode")
-        {
-            UpdatePath(transform.position, targetPosition, ref currentPath);
-        }
+        return patrolPoints[patrolIndex];
     }
 
     public List<Vector3> GenerateRandomPatrolPoints(int Count)

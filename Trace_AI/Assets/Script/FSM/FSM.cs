@@ -4,8 +4,9 @@ using UnityEngine;
 
 public class FSM : MonoBehaviour
 {
-    //public MoveBase PreviousState;
-    public MoveBase currentState;
+
+
+    public List<MoveBase> MoveStates;
 
     public float chaseThreshold = 100f;
     public float patrolThreshold = 50f;
@@ -25,17 +26,11 @@ public class FSM : MonoBehaviour
     };
 
     public List<MoveBase> availableStates = new List<MoveBase>();
-        
-    private AI ai;
+    [HideInInspector]
+    public MoveBase currentState;
 
-    void Awake()
+    private void Awake()
     {
-        ai = GetComponent<AI>();
-    }
-
-    public void InitializeStates(List<MoveBase> states)
-    {
-        availableStates = states;
         currentState = availableStates[0];
     }
 

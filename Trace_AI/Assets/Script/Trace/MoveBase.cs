@@ -18,6 +18,11 @@ public abstract class MoveBase : MonoBehaviour
         fsm = GetComponent<FSM>();
     }
 
+    void Start()
+    {
+        layerPenalties = ai.layerPenalties;
+    }
+
     public List<Node> FindPath(Vector3 startPos, Vector3 targetPos)
     {
         Node startNode = grid.NodeFromWorldPoint(startPos);
@@ -122,23 +127,9 @@ public abstract class MoveBase : MonoBehaviour
         return 14 * dstX + 10 * (dstY - dstX);
     }
 
-    public void MoveToNode(Transform aiTransform, Vector3 nodePosition, float moveSpeed)
-    {
-        Vector3 moveDirection = (nodePosition - aiTransform.position).normalized;
-        aiTransform.position += moveDirection * moveSpeed * Time.deltaTime;
+    public abstract Vector3 ArriveTargetPosition();
 
-        Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
-        targetRotation = Quaternion.Euler(0, targetRotation.eulerAngles.y, 0);
-        aiTransform.rotation = Quaternion.Slerp(aiTransform.rotation, targetRotation, Time.deltaTime * 5f);
-    }
-
-    public abstract void UpdateTargetPosition(Vector3 currentPosition, ref Vector3 targetPosition);
-    
-    public abstract void UpdatePath(Vector3 currentPosition, Vector3 targetPosition, ref List<Node> currentPath);
-
-    public abstract void HandleEvent(ref Vector3 targetPosition, ref List<Node> currentPath, string arrivalType);
-    
-    public abstract void Initialize();
+    public abstract Vector3 TraceTargetPosition();
 
     public abstract void Enter();
 
