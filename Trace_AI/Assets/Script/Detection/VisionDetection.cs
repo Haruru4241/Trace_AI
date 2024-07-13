@@ -4,7 +4,7 @@ using UnityEngine;
 public class VisionDetection : Detection
 {
     public float visionRange = 10f;
-    public float viewAngle = 60f;
+    public float viewAngle = 80f;
 
     public Color Color = Color.red;
 

@@ -1,161 +1,161 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
 
 public class AI : CharacterBase
 {
-    FSM fsm;
-
-    public float moveSpeed = 5f;
-    public float stateDecrement = 1f;
-
     public List<Detection> Detections;
 
-    [System.Serializable]
-    public class LayerPenalty
-    {
-        public LayerMask layer;
-        public int penalty;
-    }
-    [HideInInspector]
-    public List<LayerPenalty> layerPenaltiesArray; // 인스펙터 창에 노출될 리스트
+    public List<DetectionWeight> detectionWeightsList;
+    public List<LayerValue> layerValuesList;
 
-    public Dictionary<int, int> layerPenalties = new Dictionary<int, int>(); // 레이어별 가중치
-    private Renderer AIrenderer;
-    private List<Node> currentPath;
+    private Dictionary<string, float> detectionWeights;
+    private Dictionary<string, float> layerValueDict;
+
+    public Dictionary<Transform, float> targetList = new Dictionary<Transform, float>();
     private Vector3 targetPosition;
+
+    Renderer AIrenderer;
     NavMeshAgent m_Agent;
+    FSM fsm;
 
     protected override void Awake()
     {
         m_Agent = GetComponent<NavMeshAgent>();
         fsm = GetComponent<FSM>();
         AIrenderer = GetComponent<Renderer>();
-        foreach (LayerPenalty layerPenalty in layerPenaltiesArray)
-        {
-            layerPenalties.Add(layerPenalty.layer.value, layerPenalty.penalty);
-        }
+
+        detectionWeights = detectionWeightsList.ToDictionary(dw => dw.detectionType, dw => dw.value);
+        layerValueDict = layerValuesList.ToDictionary(lv => lv.layerName, lv => lv.value);
 
         // 이벤트 처리기 설정
-        GameEventSystem.OnAiAdditionalEvent += UpdateColor;
+        
 
         base.Awake();
     }
 
+    private void OnEnable()
+    {
+        GameEventSystem.OnAiAdditionalEvent += UpdateColor;
+        GameEventSystem.OnTargetDestroyed += HandleTargetDestroyed;
+    }
+
+    private void OnDisable()
+    {
+        GameEventSystem.OnAiAdditionalEvent -= UpdateColor;
+        GameEventSystem.OnTargetDestroyed -= HandleTargetDestroyed;
+    }
+
     void Update()
     {
-        var detectedObjects = Detections[0].DetectedObject(Detections);
+        fsm.UpdateFSM(Detections);
+        UpdateTargetList(Detections);
+        AdjustTargetListValues();
 
-        fsm.UpdateFSM(detectedObjects, stateDecrement);
-        targetPosition=fsm.currentState.TraceTargetPosition();
-        m_Agent.destination = targetPosition;
-        
+        targetPosition =fsm.currentState.TraceTargetPosition();
+
         if (m_Agent.pathStatus==NavMeshPathStatus.PathComplete
             && m_Agent.remainingDistance- m_Agent.stoppingDistance<0.1f)
         {
             targetPosition = fsm.currentState.ArriveTargetPosition();
-            m_Agent.destination = targetPosition;
         }
+        m_Agent.destination = targetPosition;
 
         GameEventSystem.RaiseAiAdditionalEvent();
     }
-    public void SetTargetPosition(Vector3 _targetPosition)
+
+    private void UpdateTargetList(List<Detection> detections)
     {
-        targetPosition = _targetPosition;
-    }
+        Dictionary<Transform, float> updateList = new Dictionary<Transform, float>();
 
-    public List<Transform> GetPriorityTargets(Dictionary<string, List<Transform>> detectedObjects)
-    {
-        // 감지 유형별 우선순위 맵
-        Dictionary<string, int> priorityMap = new Dictionary<string, int>
+        // 각 Detection 객체에 대해 반복
+        foreach (var detection in detections)
         {
-            { "SightDetection", 2 },
-            { "SoundDetection", 1 }
-        };
+            // 감지된 객체 리스트를 가져옴
+            List<Transform> detected = detection.Detect();
+            string detectionType = detection.GetType().Name;
 
-        Dictionary<Transform, int> objectWeights = new Dictionary<Transform, int>();
-
-        foreach (var kvp in detectedObjects)
-        {
-            string type = kvp.Key;
-            List<Transform> objects = kvp.Value;
-
-            if (priorityMap.ContainsKey(type))
+            if (detectionWeights.TryGetValue(detectionType, out float weight))
             {
-                int priority = priorityMap[type];
-
-                foreach (var obj in objects)
+                foreach (var target in detected)
                 {
-                    int layerWeight = GetLayerWeight(obj.gameObject.layer);
-                    int weight = priority * layerWeight;
-
-                    if (objectWeights.ContainsKey(obj))
+                    if (updateList.ContainsKey(target) && weight > updateList[target])
                     {
-                        objectWeights[obj] = Mathf.Max(objectWeights[obj], weight);
+                        updateList[target] = weight; // 더 높은 가중치로 업데이트
                     }
                     else
                     {
-                        objectWeights[obj] = weight;
+                        updateList[target] = weight;
                     }
                 }
             }
         }
 
-        // 우선순위에 따라 정렬된 타겟 리스트 생성
-        List<Transform> priorityTargets = new List<Transform>(objectWeights.Keys);
-        priorityTargets.Sort((a, b) => objectWeights[b].CompareTo(objectWeights[a]));
+        // 2차적으로 타겟 리스트 업데이트
+        foreach (var target in updateList.Keys)
+        {
+            if (targetList.ContainsKey(target))
+            {
+                targetList[target] += updateList[target]; // 존재하면 가중치 더하기
+                targetList[target] = Mathf.Min(targetList[target], fsm.stateMaxValue); // 최대값 제한
+            }
+            else
+            {
+                targetList[target] = updateList[target]; // 존재하지 않으면 추가
+            }
+        }
 
-        return priorityTargets;
+        // 타겟 리스트를 값의 내림차순으로 정렬
+        targetList = targetList.OrderByDescending(t => t.Value).ToDictionary(t => t.Key, t => t.Value);
     }
 
-    private int GetLayerWeight(int layer)
+    private void HandleTargetDestroyed(object sender, GameEventArgs e)
     {
-        // 레이어에 따라 가중치를 설정 (예시: 레이어에 따른 가중치 매핑)
-        switch (LayerMask.LayerToName(layer))
+        if (targetList.ContainsKey(e.Source))
         {
-            case "Enemy":
-                return 3;
-            case "Item":
-                return 2;
-            case "Ally":
-                return 1;
-            default:
-                return 1;
+            targetList.Remove(e.Source);
         }
     }
 
-    bool HasReachedPosition(Vector3 a, Vector3 b, float distanceThreshold)
+    private void AdjustTargetListValues()
     {
-        return Vector3.Distance(new Vector3(a.x, 0, a.z), new Vector3(b.x, 0, b.z)) < distanceThreshold;
+        var keys = targetList.Keys.ToList();
+        foreach (var key in keys)
+        {
+            string layerName = LayerMask.LayerToName(key.gameObject.layer);
+            if (layerValueDict.TryGetValue(layerName, out float layerValue))
+            {
+                targetList[key] -= layerValue;
+                if (targetList[key] <= 0)
+                {
+                    targetList.Remove(key); // 밸류가 0 이하가 되면 리스트에서 제거
+                }
+            }
+        }
+    }
+
+    public void SetTargetPosition(Vector3 _targetPosition)
+    {
+        targetPosition = _targetPosition;
     }
 
     public override void UpdateSpeed(float value)
     {
-        m_Agent.speed = value;
+        if (m_Agent != null) m_Agent.speed = value;
     }
 
     void UpdateColor()
     {
-        float stateValue = fsm.stateValue;
+        float stateValue = 0;
+        if (targetList.Any())
+        {
+            stateValue = targetList.First().Value;
+        }
+
         float t = Mathf.InverseLerp(0, fsm.chaseThreshold, stateValue);
         AIrenderer.material.color = Color.Lerp(Color.green, Color.red, t);
-    }
-
-    void OnDrawGizmos()
-    {
-        if (currentPath != null && currentPath.Count > 0)
-        {
-            Gizmos.color = Color.blue;
-
-            for (int i = 0; i < currentPath.Count - 1; i++)
-            {
-                Gizmos.DrawLine(currentPath[i].worldPosition, currentPath[i + 1].worldPosition);
-                Gizmos.DrawSphere(currentPath[i].worldPosition, 0.2f);
-            }
-
-            Gizmos.DrawSphere(currentPath[currentPath.Count - 1].worldPosition, 0.2f);
-        }
     }
 }

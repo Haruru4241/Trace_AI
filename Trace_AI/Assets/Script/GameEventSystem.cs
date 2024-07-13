@@ -14,11 +14,17 @@ public class GameEventArgs : EventArgs
 public static class GameEventSystem
 {
     public static event EventHandler<GameEventArgs> OnSoundDetected;
+    public static event EventHandler<GameEventArgs> OnTargetDestroyed;
     public static event Action OnAiAdditionalEvent;
 
     public static void RaiseSoundDetected(Transform source)
     {
         OnSoundDetected?.Invoke(null, new GameEventArgs(source));
+    }
+
+    public static void RaiseTargetDestroyed(Transform source) // 파괴 이벤트 발생 메서드 추가
+    {
+        OnTargetDestroyed?.Invoke(null, new GameEventArgs(source));
     }
 
     public static void RaiseAiAdditionalEvent()

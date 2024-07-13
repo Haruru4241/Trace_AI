@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class Patrol : MoveBase
 {
@@ -7,11 +9,14 @@ public class Patrol : MoveBase
     public Color Color=Color.green;
     private int patrolIndex;
 
+    public int RandomPoints = 4;
+    public float range = 50.0f;
+
     void Start()
     {
         if (patrolPoints == null || patrolPoints.Count <= 1)
         {
-            patrolPoints = GenerateRandomPatrolPoints(4);
+            patrolPoints = GenerateRandomPatrolPoints();
         }
 
         // ¼øÂû ÀÎµ¦½º ÃÊ±âÈ­
@@ -26,7 +31,7 @@ public class Patrol : MoveBase
 
     public override void Execute()
     {
-        if(fsm.stateValue > fsm.chaseThreshold)
+        if(ai.targetList.Any() && ai.targetList.First().Value > fsm.chaseThreshold)
         {
             Exit();
         }
@@ -48,20 +53,29 @@ public class Patrol : MoveBase
         return patrolPoints[patrolIndex];
     }
 
-    public List<Vector3> GenerateRandomPatrolPoints(int Count)
+    public List<Vector3> GenerateRandomPatrolPoints()
     {
-        List<Vector3> points = new List<Vector3>();
+        List<Vector3> patrolPoints = new List<Vector3>();
 
-        while (points.Count < Count)
+        while (patrolPoints.Count < RandomPoints)
         {
-            Vector3 point = grid.GetRandomPoint();
+            Vector3 randomPoint = GetRandomPointWithinRange();
+            NavMeshHit hit;
 
-            if (IsValidPatrolPoint(point, 1f))
+            if (NavMesh.SamplePosition(randomPoint, out hit, 1.0f, NavMesh.AllAreas))
             {
-                points.Add(point);
+                patrolPoints.Add(hit.position);
             }
         }
-        return points;
+
+        return patrolPoints;
+    }
+
+    private Vector3 GetRandomPointWithinRange()
+    {
+        float x = Random.Range(-range, range);
+        float z = Random.Range(-range, range);
+        return new Vector3(x, 0, z);
     }
 
     void OnDrawGizmos()
