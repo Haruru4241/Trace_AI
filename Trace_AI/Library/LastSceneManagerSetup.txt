@@ -1,5 +1,5 @@
 sceneSetups:
-- path: Assets/Scenes/Trace_10/No.10.unity
+- path: Assets/Scenes/No.11.unity
   isLoaded: 1
   isActive: 1
   isSubScene: 0

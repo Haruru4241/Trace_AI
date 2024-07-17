@@ -10,7 +10,7 @@ public class Patrol : MoveBase
     private int patrolIndex;
 
     public int RandomPoints = 4;
-    public float range = 50.0f;
+    public float range = 200.0f;
 
     void Start()
     {
@@ -57,14 +57,20 @@ public class Patrol : MoveBase
     {
         List<Vector3> patrolPoints = new List<Vector3>();
 
-        while (patrolPoints.Count < RandomPoints)
+        for (int i = 0; i < RandomPoints; i++)
         {
-            Vector3 randomPoint = GetRandomPointWithinRange();
-            NavMeshHit hit;
+            Vector3 randomPoint = Random.insideUnitSphere * range;
+            randomPoint += transform.position; // Offset by the position of the object
 
-            if (NavMesh.SamplePosition(randomPoint, out hit, 1.0f, NavMesh.AllAreas))
+            NavMeshHit hit;
+            if (NavMesh.SamplePosition(randomPoint, out hit, range, NavMesh.AllAreas))
             {
                 patrolPoints.Add(hit.position);
+            }
+            else
+            {
+                // If the point is not on the NavMesh, decrement i to try again
+                i--;
             }
         }
 
@@ -85,7 +91,7 @@ public class Patrol : MoveBase
             Gizmos.color = Color;
             foreach (var point in patrolPoints)
             {
-                Gizmos.DrawSphere(point, 0.2f);
+                Gizmos.DrawSphere(point, 2f);
             }
         }
     }

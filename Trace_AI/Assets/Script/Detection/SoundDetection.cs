@@ -38,6 +38,12 @@ public class SoundDetection : Detection
     public override List<Transform> Detect()
     {
         List<Transform> detectedObjects = new List<Transform>();
+
+        if (!m_Agent.isOnNavMesh)
+        {
+            Debug.LogWarning("NavMeshAgent is not on a NavMesh.");
+            return detectedObjects;
+        }
         Vector3 originalDestination = m_Agent.destination;
 
         foreach (var source in detectedSoundSources)
