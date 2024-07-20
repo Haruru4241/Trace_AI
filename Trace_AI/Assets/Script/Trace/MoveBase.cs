@@ -6,12 +6,6 @@ public abstract class MoveBase : MonoBehaviour
     protected AI ai;
     protected FSM fsm;
 
-    void Awake()
-    {
-        ai = gameObject.GetComponent<AI>();
-        fsm = GetComponent<FSM>();
-    }
-
     public int FindClosestPoint(Vector3 currentPosition, List<Vector3> points)
     {
         int closestIndex = 0;
@@ -39,4 +33,10 @@ public abstract class MoveBase : MonoBehaviour
     public abstract void Execute();
 
     public abstract void Exit();
+
+    public virtual void Initialize()
+    {
+        ai = gameObject.GetComponent<AI>();
+        fsm = GetComponent<FSM>();
+    }
 }

@@ -13,9 +13,13 @@ public class FSM : MonoBehaviour
     [HideInInspector]
     public MoveBase currentState;
 
-    private void Awake()
+    public void Initialize()
     {
         currentState = availableStates[0];
+        foreach (MoveBase state in availableStates)
+        {
+            state.Initialize();
+        }
     }
 
     public void SetState<T>() where T : MoveBase

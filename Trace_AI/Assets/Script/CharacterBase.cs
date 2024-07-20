@@ -5,12 +5,18 @@ using UnityEngine;
 public abstract class CharacterBase : MonoBehaviour
 {
     public float baseMoveSpeed = 5.0f; // 기본 이동 속도
+
+    [SerializeField]
     protected float currentMoveSpeed; // 현재 이동 속도
     protected List<float> speedModifiers = new List<float> { };
 
     protected bool isMoving;
     // Start is called before the first frame update
-    protected virtual void Awake()
+    void Awake()
+    {
+        Initialize();
+    }
+    public virtual void Initialize()
     {
         speedModifiers.Add(baseMoveSpeed);
         UpdateMoveSpeed();
@@ -54,6 +60,7 @@ public abstract class CharacterBase : MonoBehaviour
     {
         return isMoving;
     }
+
 
     public abstract void UpdateSpeed(float value);
 }

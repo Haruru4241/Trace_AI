@@ -7,15 +7,16 @@ public class PlayerMovement : CharacterBase
     public AudioClip[] movementSounds; // 여러 소리 클립을 저장할 배열
     private Rigidbody rb;
 
-    protected override void Awake()
+    public override void Initialize()
     {
+        base.Initialize();
+
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.loop = false; // 발자국 소리를 반복하지 않도록 설정
 
         rb = gameObject.GetComponent<Rigidbody>();
         rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ | RigidbodyConstraints.FreezeRotationY;
 
-        base.Awake();
     }
 
     void FixedUpdate()

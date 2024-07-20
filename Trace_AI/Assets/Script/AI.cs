@@ -22,20 +22,22 @@ public class AI : CharacterBase
     NavMeshAgent m_Agent;
     FSM fsm;
 
-    protected override void Awake()
+    public override void Initialize()
     {
         m_Agent = GetComponent<NavMeshAgent>();
         fsm = GetComponent<FSM>();
+        fsm.Initialize();
         AIrenderer = GetComponent<Renderer>();
 
         detectionWeights = detectionWeightsList.ToDictionary(dw => dw.detectionType, dw => dw.value);
         layerValueDict = layerValuesList.ToDictionary(lv => lv.layerName, lv => lv.value);
 
         // 이벤트 처리기 설정
-        
 
-        base.Awake();
+
+        base.Initialize();
     }
+
 
     private void OnEnable()
     {
@@ -49,13 +51,23 @@ public class AI : CharacterBase
         GameEventSystem.OnTargetDestroyed -= HandleTargetDestroyed;
     }
 
-    void Update()
+    void FixedUpdate()
     {
         fsm.UpdateFSM(Detections);
         UpdateTargetList(Detections);
         AdjustTargetListValues();
+        if (targetList.Any())
+        {
+            Debug.Log($"{transform.name}의 우선 타겟 {targetList.First().Key.name}:{targetList.First().Value} ");
+        }
 
-        targetPosition =fsm.currentState.TraceTargetPosition();
+
+        Vector3 targetPosition1= fsm.currentState.TraceTargetPosition();
+        if (targetPosition == targetPosition1) {
+            targetPosition = targetPosition1;
+            m_Agent.destination = targetPosition;
+        }
+        
 
         if (m_Agent.pathStatus==NavMeshPathStatus.PathComplete
             && m_Agent.remainingDistance- m_Agent.stoppingDistance<0.1f)
@@ -112,13 +124,6 @@ public class AI : CharacterBase
         targetList = targetList.OrderByDescending(t => t.Value).ToDictionary(t => t.Key, t => t.Value);
     }
 
-    private void HandleTargetDestroyed(object sender, GameEventArgs e)
-    {
-        if (targetList.ContainsKey(e.Source))
-        {
-            targetList.Remove(e.Source);
-        }
-    }
 
     private void AdjustTargetListValues()
     {
@@ -144,7 +149,16 @@ public class AI : CharacterBase
 
     public override void UpdateSpeed(float value)
     {
+        currentMoveSpeed = value;
         if (m_Agent != null) m_Agent.speed = value;
+    }
+
+    private void HandleTargetDestroyed(object sender, GameEventArgs e)
+    {
+        if (targetList.ContainsKey(e.Source))
+        {
+            targetList.Remove(e.Source);
+        }
     }
 
     void UpdateColor()

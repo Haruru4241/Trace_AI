@@ -12,8 +12,9 @@ public class Patrol : MoveBase
     public int RandomPoints = 4;
     public float range = 200.0f;
 
-    void Start()
+    public override void Initialize()
     {
+        base.Initialize();
         if (patrolPoints == null || patrolPoints.Count <= 1)
         {
             patrolPoints = GenerateRandomPatrolPoints();
@@ -23,10 +24,16 @@ public class Patrol : MoveBase
         patrolIndex = FindClosestPoint(transform.position, patrolPoints);
     }
 
+    void Start()
+    {
+
+    }
+
     public override void Enter()
     {
         patrolIndex = FindClosestPoint(transform.position, patrolPoints);
         ai.SetTargetPosition(patrolPoints[patrolIndex]);
+        Debug.Log($"{transform.name} 순찰 상태 진입, 목표: {patrolPoints[patrolIndex]}");
     }
 
     public override void Execute()
@@ -40,11 +47,13 @@ public class Patrol : MoveBase
     public override void Exit()
     {
         fsm.SetState<Trace>();
+        Debug.Log($"{transform.name} 순찰 상태 탈출");
     }
 
     public override Vector3 ArriveTargetPosition()
     {
         patrolIndex = (patrolIndex + 1) % patrolPoints.Count;
+        Debug.Log($"{transform.name} 순찰 목표 재설정: {patrolPoints[patrolIndex]}");
         return patrolPoints[patrolIndex];
     }
 
@@ -75,13 +84,6 @@ public class Patrol : MoveBase
         }
 
         return patrolPoints;
-    }
-
-    private Vector3 GetRandomPointWithinRange()
-    {
-        float x = Random.Range(-range, range);
-        float z = Random.Range(-range, range);
-        return new Vector3(x, 0, z);
     }
 
     void OnDrawGizmos()
