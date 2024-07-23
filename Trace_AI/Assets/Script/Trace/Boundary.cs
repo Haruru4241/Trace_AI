@@ -1,93 +1,95 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using static ProceduralMap;
 
 public class Boundary : MoveBase
 {
     private Vector3 targetPosition;
-    GameManager gameManager;
-    BlockType[,] mapBlocksList;
-    Dictionary<string, float[,]> weightTables;
     Vector2Int currentPosition;
-    float[,] finalWeightTable;
-    Vector2Int lastPosition;
+
+    public List<WeightTable> weightTableTypes = new List<WeightTable>();
+
+    public static BlockType[,] mapBlocksList;
+
+    Dictionary<WeightTableType, WeightTable> weightTables;
+    WeightTable finalWeightTable;
 
     public override void Initialize()
     {
         base.Initialize();
+
         GameObject gameManagerObject = GameObject.Find("GameManager");
-        gameManager = gameManagerObject.GetComponent<GameManager>();
+        GameManager gameManager = gameManagerObject.GetComponent<GameManager>();
         mapBlocksList = gameManager.getMapBlocksList();
-        InitializeWeightTable();
-        currentPosition = new Vector2Int((int)transform.position.x, (int)transform.position.y);
+
+        int width = mapBlocksList.GetLength(0);
+        int height = mapBlocksList.GetLength(1);
+
+        weightTables = new Dictionary<WeightTableType, WeightTable>
+        {
+            { WeightTableType.LastPosition, new WeightTable(new float[width, height]) },
+            { WeightTableType.Visited, new WeightTable(new float[width, height]) },
+            { WeightTableType.Environmental, new WeightTable(new float[width, height]) },
+            { WeightTableType.EndPosition, new WeightTable(new float[width, height]) }
+        };
+
+        finalWeightTable = new WeightTable(new float[width, height]);
     }
 
     public override void Enter()
     {
-        lastPosition = new Vector2Int((int)ai.targetList.First().Key.position.x, (int)ai.targetList.First().Key.position.y);
-        ArriveTargetPosition();
         Debug.Log($"{transform.name} 경계 상태 진입, 목표: {targetPosition}");
+        Vector2Int lastPosition = new Vector2Int((int)ai.targetList.First().Key.position.x, (int)ai.targetList.First().Key.position.z);
+        UpdateWeightMap(WeightTableType.LastPosition, lastPosition, 3, 10, 0);
+
+        Debug.Log(WeightTableType.LastPosition);
+        weightTables[WeightTableType.LastPosition].PrintValues();
+        ArriveTargetPosition();
     }
 
     public override void Execute()
     {
-        Vector2Int newPosition = new Vector2Int((int)transform.position.x, (int)transform.position.y);
+        if (agent.remainingDistance - agent.stoppingDistance < 0.1f) ArriveTargetPosition();
+
+
+        Vector2Int newPosition = CurrentPosition();
         if (newPosition != currentPosition)
         {
-            UpdateWeightMap("aiVisitedWeightTable", newPosition, 5, -1, 0);
+            UpdateWeightMap(WeightTableType.Visited, newPosition, 4, -0.3f, 0);
             currentPosition = newPosition;
         }
-        if (ai.targetList.Any() && ai.targetList.First().Value <= fsm.patrolThreshold)
+
+        if (ai.targetList.Any() && (ai.targetList.First().Value >= fsm.chaseThreshold
+            || ai.targetList.First().Value <= fsm.patrolThreshold))
         {
             Exit();
         }
     }
 
-    private void UpdateFinalWeightTable()
-    {
-        int width = mapBlocksList.GetLength(0);
-        int height = mapBlocksList.GetLength(1);
-
-        for (int x = 0; x < width; x++)
-        {
-            for (int y = 0; y < height; y++)
-            {
-                finalWeightTable[x, y] = 0;
-                foreach (var table in weightTables.Values)
-                {
-                    finalWeightTable[x, y] += table[x, y];
-                }
-            }
-        }
-    }
-
     public override void Exit()
     {
-        fsm.SetState<Patrol>();
         Debug.Log($"{transform.name} 경계 상태 탈출");
+        fsm.SetState<Patrol>();
     }
 
-    public override Vector3 ArriveTargetPosition()
+    public override void ArriveTargetPosition()
     {
-        Vector2Int currentPosition = new Vector2Int((int)transform.position.x, (int)transform.position.y);
-        List<Vector2Int> endPoints = FindEndPointsBFS(currentPosition, 5);
-        UpdateWeightMap("playerWeightTable", lastPosition, 5, 3, 0);
-        UpdateFinalWeightTable();
-        Vector2Int bestEndPoint = FindBestEndPoint(endPoints);
-        targetPosition = new Vector3(bestEndPoint.x, transform.position.y, bestEndPoint.y);
-        int width = mapBlocksList.GetLength(0);
-        int height = mapBlocksList.GetLength(1);
-        for (int x = 0; x < width; x++)
-        {
-            for (int y = 0; y < height; y++)
-            {
-                weightTables["playerWeightTable"][x, y] = 0;
-                weightTables["aiVisitedWeightTable"][x, y] = 0;
-            }
-        }
+        List<Vector2Int> endPoints = FindEndPointsBFS(CurrentPosition(), 4);
+        foreach (var endPoint in endPoints) UpdateWeightMap(WeightTableType.EndPosition, endPoint, 1, 2, 0);
+
+        Debug.Log(WeightTableType.Visited);
+        weightTables[WeightTableType.Visited].PrintValues();
+        Debug.Log(WeightTableType.EndPosition);
+        weightTables[WeightTableType.EndPosition].PrintValues();
+
+        Vector2Int bestEndPoint = FindBestEndPoint();
+        targetPosition = new Vector3(bestEndPoint.x, 1, bestEndPoint.y);
+
+        weightTables[WeightTableType.LastPosition].InitializeValues();
+        weightTables[WeightTableType.Visited].InitializeValues();
+        weightTables[WeightTableType.EndPosition].InitializeValues();
+
         Debug.Log($"{transform.name} 경계 목표 재설정: {targetPosition}");
-        return targetPosition;
     }
 
     public override Vector3 TraceTargetPosition()
@@ -95,43 +97,7 @@ public class Boundary : MoveBase
         return targetPosition;
     }
 
-    private void InitializeWeightTable()
-    {
-        int width = mapBlocksList.GetLength(0);
-        int height = mapBlocksList.GetLength(1);
-        weightTables = new Dictionary<string, float[,]>
-        {
-            { "playerWeightTable", new float[width, height] },
-            { "aiVisitedWeightTable", new float[width, height] },
-            { "mapWeightTable", new float[width, height] }
-        };
-        finalWeightTable = new float[width, height];
-
-        for (int x = 0; x < width; x++)
-        {
-            for (int y = 0; y < height; y++)
-            {
-                weightTables["playerWeightTable"][x, y] = 0;
-                weightTables["aiVisitedWeightTable"][x, y] = 0;
-                weightTables["mapWeightTable"][x, y] = GetInitialMapWeight(mapBlocksList[x, y]);
-            }
-        }
-    }
-
-    private float GetInitialMapWeight(BlockType blockType)
-    {
-        switch (blockType)
-        {
-            case BlockType.Floor:
-                return 1;
-            case BlockType.Door:
-                return 5;
-            default:
-                return 0;
-        }
-    }
-
-    private void UpdateWeightMap(string tableName, Vector2Int newPosition, int count, float weight, float decreasePerMove)
+    private void UpdateWeightMap(WeightTableType tableName, Vector2Int newPosition, int count, float weight, float decreasePerMove)
     {
         int[,] visited = new int[mapBlocksList.GetLength(0), mapBlocksList.GetLength(1)];
         Queue<(Vector2Int position, int movesLeft)> queue = new Queue<(Vector2Int, int)>();
@@ -185,7 +151,7 @@ public class Boundary : MoveBase
                 {
                     int cost = GetMovementCost(mapBlocksList[neighbor.x, neighbor.y]);
                     int newMovesLeft = movesLeft - cost;
-                    if (newMovesLeft >= 0)
+                    if (newMovesLeft > 0)
                     {
                         queue.Enqueue((neighbor, newMovesLeft));
                         visited.Add(neighbor);
@@ -199,6 +165,64 @@ public class Boundary : MoveBase
         }
 
         return endPoints;
+    }
+
+    private Vector2Int FindBestEndPoint()
+    {
+        float highestWeight = float.MinValue;
+        List<Vector2Int> bestEndPoints = new List<Vector2Int>();
+
+        int rows = mapBlocksList.GetLength(0);
+        int cols = mapBlocksList.GetLength(1);
+
+        finalWeightTable.InitializeValues();
+
+        for (int x = 0; x < rows; x++)
+        {
+            for (int y = 0; y < cols; y++)
+            {
+                foreach (var table in weightTables.Values)
+                {
+                    finalWeightTable[x, y] += table[x, y];
+                }
+
+                float weight = finalWeightTable[x, y];
+                if (weight > highestWeight)
+                {
+                    highestWeight = weight;
+                    bestEndPoints.Clear(); // 최고 가중치 갱신 시 리스트 초기화
+                    bestEndPoints.Add(new Vector2Int(x, y));
+                }
+                else if (weight == highestWeight) bestEndPoints.Add(new Vector2Int(x, y));
+            }
+        }
+
+        Debug.Log("finalWeightTable");
+        finalWeightTable.PrintValues();
+
+        if (bestEndPoints.Count > 0)
+        {
+            int randomIndex = Random.Range(0, bestEndPoints.Count);
+
+            Debug.Log($"bestEndPoints {bestEndPoints.Count} {randomIndex}");
+            return bestEndPoints[randomIndex];
+        }
+        return Vector2Int.zero;
+    }
+
+    private int GetMovementCost(BlockType blockType)
+    {
+        switch (blockType)
+        {
+            case BlockType.Floor:
+                return 1;
+            case BlockType.Door:
+                return 10;
+            case BlockType.Hallway:
+                return 1;
+            default:
+                return 1; // Default movement cost
+        }
     }
 
     private List<Vector2Int> GetValidNeighbors(Vector2Int position)
@@ -215,57 +239,93 @@ public class Boundary : MoveBase
         return neighbors;
     }
 
-    private int GetMovementCost(BlockType blockType)
-    {
-        switch (blockType)
-        {
-            case BlockType.Floor:
-                return 1;
-            case BlockType.Door:
-                return 10;
-            default:
-                return 1; // Default movement cost
-        }
-    }
-
-
     private bool IsPassable(Vector2Int position)
     {
-        return IsWithinBounds(position.x, position.y)
-            && mapBlocksList[position.x, position.y] != BlockType.Wall;
+        int x = position.x;
+        int y = position.y;
+
+        return x >= 0 && y >= 0 && x < mapBlocksList.GetLength(0) && y < mapBlocksList.GetLength(1)
+            && mapBlocksList[x, y] != BlockType.Wall;
     }
 
-    private bool IsWithinBounds(int x, int y)
+    private Vector2Int CurrentPosition()
     {
-        return x >= 0 && y >= 0 && x < mapBlocksList.GetLength(0) && y < mapBlocksList.GetLength(1);
+        return new Vector2Int((int)transform.position.x, (int)transform.position.z);
     }
 
-    public Vector2Int FindBestEndPoint(List<Vector2Int> endPoints)
+    void OnDrawGizmos()
     {
-        List<Vector2Int> bestPoints = new List<Vector2Int>();
-        float highestWeight = float.MinValue;
+        Gizmos.color = Color.blue;
+        Gizmos.DrawSphere(targetPosition, 1f);
+    }
+}
+public enum WeightTableType
+{
+    LastPosition,
+    Visited,
+    Environmental,
+    EndPosition
+}
 
-        foreach (var point in endPoints)
+[System.Serializable]
+public class WeightTable
+{
+    public float[,] Values { get; private set; }
+    public string tableName = "Default";
+    public int count = 1;
+    public float weight = 0;
+    public float decreasePerMove = 0;
+
+    public WeightTable(float[,] values)
+    {
+        Values = values;
+    }
+
+    public WeightTable(int width, int height)
+    {
+        Values = new float[width, height];
+        InitializeValues();
+    }
+
+    public void InitializeValues()
+    {
+        for (int i = 0; i < Values.GetLength(0); i++)
         {
-            float weight = finalWeightTable[point.x, point.y];
-            if (weight > highestWeight)
+            for (int j = 0; j < Values.GetLength(1); j++)
             {
-                highestWeight = weight;
-                bestPoints.Clear();
-                bestPoints.Add(point);
-            }
-            else if (weight == highestWeight)
-            {
-                bestPoints.Add(point);
+                Values[i, j] = 0f;
             }
         }
+    }
 
-        if (bestPoints.Count == 0)
+    public float this[int x, int y]
+    {
+        get { return Values[x, y]; }
+        set { Values[x, y] = value; }
+    }
+
+    public void PrintValues()
+    {
+        string name = this.ToString();
+        string allValues = "";
+        for (int i = Values.GetLength(1) - 1; i >= 0; i--) // 아래에서 위로
         {
-            return endPoints[0]; // 기본값
+            for (int j = 0; j < Values.GetLength(1); j++) // 왼쪽에서 오른쪽으로
+            {
+                string valueStr = Values[j, i].ToString();
+                if (Boundary.mapBlocksList[j, i] == BlockType.Empty)
+                {
+                    valueStr = "=";
+                }
+                else
+                {
+                    valueStr = Values[j, i].ToString();
+                }
+                int padding = 3 - valueStr.Length; // 총 3칸을 맞추기 위한 패딩 계산
+                allValues += valueStr + new string(' ', padding > 0 ? padding : 0); // 필요한 공백 추가
+            }
+            allValues += "\n"; // 행 끝에서 줄 바꿈 추가
         }
-
-        System.Random rand = new System.Random();
-        return bestPoints[rand.Next(bestPoints.Count)];
+        Debug.Log(allValues.TrimEnd()); // 마지막 줄 바꿈 제거
     }
 }

@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: c8a6125b6debb3f4cabfb117f30729d9
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - floorPrefab: {fileID: 4703646346143792990, guid: b37f05bc252660144aa80d000446bd19, type: 3}
+  - wallPrefab: {fileID: 7530213000201419902, guid: faee04305d5908d47859779ae4517520, type: 3}
+  - hallwayPrefab: {fileID: 5369499978676715903, guid: 2b09c2098d520dc4bb9fa15428f802bb, type: 3}
+  - doorPrefab: {fileID: 756542778120021838, guid: 5fd77489bef0b6b419445a138e87b523, type: 3}
+  - ai: {instanceID: 0}
+  - player: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -4,20 +4,16 @@ using UnityEngine.AI;
 
 public class SoundDetection : Detection
 {
-    public float hearingRange = 15f;
-
-    public Color Color = Color.green;
+    public float hearingRange = 10f;
+    [Tooltip("기즈모 색상")]
+    public Color gizmoColor = Color.magenta;
 
     private List<Transform> detectedSoundSources = new List<Transform>();
-    protected NavMeshAgent m_Agent;
-
-    void Awake()
-    {
-        m_Agent = GetComponent<NavMeshAgent>();
-    }
+    private NavMeshAgent m_Agent;
 
     private void OnEnable()
     {
+        m_Agent = GetComponent<NavMeshAgent>();
         GameEventSystem.OnSoundDetected += HandleGameEvent;
     }
 
@@ -63,7 +59,7 @@ public class SoundDetection : Detection
 
     void OnDrawGizmos()
     {
-        Gizmos.color = Color;
+        Gizmos.color = gizmoColor;
         Gizmos.DrawWireSphere(transform.position, hearingRange);
     }
 }

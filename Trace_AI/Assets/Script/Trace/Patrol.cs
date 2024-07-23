@@ -5,28 +5,27 @@ using UnityEngine.AI;
 
 public class Patrol : MoveBase
 {
+    [Tooltip("2개 이상의 위치를 설정하여 해당 위치를 순찰")]
     public List<Vector3> patrolPoints;
-    public Color Color=Color.green;
-    private int patrolIndex;
-
+  
+    [Tooltip("랜덤 설정 시 생성할 위치 갯수")]
     public int RandomPoints = 4;
-    public float range = 200.0f;
+
+    [Tooltip("기즈모 색상")]
+    public Color Color = Color.cyan;
+
+    private int patrolIndex;
 
     public override void Initialize()
     {
         base.Initialize();
         if (patrolPoints == null || patrolPoints.Count <= 1)
         {
-            patrolPoints = GenerateRandomPatrolPoints();
+            //순찰 경로를 설정하지 않았을 시 랜덤으로 경로 설정
+            patrolPoints = GetRandomNavMeshPosition();
         }
 
-        // 순찰 인덱스 초기화
         patrolIndex = FindClosestPoint(transform.position, patrolPoints);
-    }
-
-    void Start()
-    {
-
     }
 
     public override void Enter()
@@ -38,7 +37,9 @@ public class Patrol : MoveBase
 
     public override void Execute()
     {
-        if(ai.targetList.Any() && ai.targetList.First().Value > fsm.chaseThreshold)
+        if (agent.remainingDistance - agent.stoppingDistance < 0.1f) ArriveTargetPosition();
+
+        if (ai.targetList.Any() && ai.targetList.First().Value > fsm.chaseThreshold)
         {
             Exit();
         }
@@ -46,15 +47,14 @@ public class Patrol : MoveBase
 
     public override void Exit()
     {
-        fsm.SetState<Trace>();
         Debug.Log($"{transform.name} 순찰 상태 탈출");
+        fsm.SetState<Trace>();
     }
 
-    public override Vector3 ArriveTargetPosition()
+    public override void ArriveTargetPosition()
     {
-        patrolIndex = (patrolIndex + 1) % patrolPoints.Count;
         Debug.Log($"{transform.name} 순찰 목표 재설정: {patrolPoints[patrolIndex]}");
-        return patrolPoints[patrolIndex];
+        patrolIndex = (patrolIndex + 1) % patrolPoints.Count;
     }
 
     public override Vector3 TraceTargetPosition()
@@ -62,25 +62,31 @@ public class Patrol : MoveBase
         return patrolPoints[patrolIndex];
     }
 
-    public List<Vector3> GenerateRandomPatrolPoints()
+    private List<Vector3> GetRandomNavMeshPosition()
     {
         List<Vector3> patrolPoints = new List<Vector3>();
 
+        GameManager gameManager = FindObjectOfType<GameManager>();
+        var mapBlocksList= gameManager.getMapBlocksList();
+
+        int count = 10000;
+
         for (int i = 0; i < RandomPoints; i++)
         {
-            Vector3 randomPoint = Random.insideUnitSphere * range;
-            randomPoint += transform.position; // Offset by the position of the object
+            count -= 1;
+            if (count == 0) return null;
+            Vector3 randomPosition = new Vector3(
+            Random.Range(0, mapBlocksList.GetLength(0)),
+            0,
+            Random.Range(0, mapBlocksList.GetLength(1))
+        );
 
             NavMeshHit hit;
-            if (NavMesh.SamplePosition(randomPoint, out hit, range, NavMesh.AllAreas))
+            if (NavMesh.SamplePosition(randomPosition, out hit, 1.0f, NavMesh.AllAreas))
             {
-                patrolPoints.Add(hit.position);
+                patrolPoints.Add((Vector3)hit.position);
             }
-            else
-            {
-                // If the point is not on the NavMesh, decrement i to try again
-                i--;
-            }
+            else i -= 1; 
         }
 
         return patrolPoints;
@@ -93,7 +99,7 @@ public class Patrol : MoveBase
             Gizmos.color = Color;
             foreach (var point in patrolPoints)
             {
-                Gizmos.DrawSphere(point, 2f);
+                Gizmos.DrawSphere(point, 0.5f);
             }
         }
     }

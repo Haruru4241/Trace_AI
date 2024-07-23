@@ -1,11 +1,12 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.AI;
 
 public abstract class MoveBase : MonoBehaviour
 {
     protected AI ai;
     protected FSM fsm;
-
+    protected NavMeshAgent agent;
     public int FindClosestPoint(Vector3 currentPosition, List<Vector3> points)
     {
         int closestIndex = 0;
@@ -24,7 +25,7 @@ public abstract class MoveBase : MonoBehaviour
         return closestIndex;
     }
 
-    public abstract Vector3 ArriveTargetPosition();
+    public abstract void ArriveTargetPosition();
 
     public abstract Vector3 TraceTargetPosition();
 
@@ -38,5 +39,6 @@ public abstract class MoveBase : MonoBehaviour
     {
         ai = gameObject.GetComponent<AI>();
         fsm = GetComponent<FSM>();
+        agent = GetComponent<NavMeshAgent>();
     }
 }

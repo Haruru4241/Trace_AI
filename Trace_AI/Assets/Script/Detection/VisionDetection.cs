@@ -3,10 +3,10 @@ using UnityEngine;
 
 public class VisionDetection : Detection
 {
-    public float visionRange = 10f;
+    public float visionRange = 7f;
     public float viewAngle = 80f;
-
-    public Color Color = Color.red;
+    [Tooltip("기즈모 색상")]
+    public Color gizmoColor = Color.red;
 
     public override List<Transform> Detect()
     {
@@ -23,7 +23,8 @@ public class VisionDetection : Detection
             if (dotProduct > Mathf.Cos(viewAngle * 0.5f * Mathf.Deg2Rad))
             {
                 Ray ray = new Ray(transform.position, directionToPlayer);
-                if (Physics.Raycast(ray, out RaycastHit hitInfo, visionRange))
+                if (Physics.Raycast(ray, out RaycastHit hitInfo, visionRange) 
+                    && (detectionLayerMask.value & (1 << hitInfo.collider.gameObject.layer)) != 0)
                 {
                     detectedObjects.Add(hit.transform);
                 }
@@ -35,7 +36,7 @@ public class VisionDetection : Detection
 
     void OnDrawGizmos()
     {
-        Gizmos.color = Color;
+        Gizmos.color = gizmoColor;
         Gizmos.DrawWireSphere(transform.position, visionRange);
 
         // 시야각을 시각적으로 표시

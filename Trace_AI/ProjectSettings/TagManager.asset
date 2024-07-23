@@ -5,6 +5,10 @@ TagManager:
   serializedVersion: 2
   tags:
   - AI
+  - Floor
+  - Wall
+  - Hallway
+  - Door
   layers:
   - Default
   - TransparentFX
