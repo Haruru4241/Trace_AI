@@ -4,139 +4,180 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.AI.Navigation;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.AI;
 using static ProceduralMap;
 
 public class GameManager : MonoBehaviour
 {
+    // 싱글톤 인스턴스를 저장할 정적 필드
+    private static GameManager _instance;
+
+    // 싱글톤 인스턴스에 접근할 수 있는 프로퍼티
+    // 싱글톤 인스턴스에 접근할 수 있는 프로퍼티
+    public static GameManager Instance
+    {
+        get
+        {
+            // 인스턴스가 없으면 찾거나 생성
+            if (_instance == null)
+            {
+                _instance = FindObjectOfType<GameManager>();
+
+                if (_instance == null)
+                {
+                    GameObject singleton = new GameObject(typeof(GameManager).ToString());
+                    _instance = singleton.AddComponent<GameManager>();
+                }
+            }
+
+            return _instance;
+        }
+    }
+
     public List<GameObject> Entities;
-    [Tooltip("��Ÿ�� ����Ʈ ����, ���� �� ������ ��ġ�� ����")]
+    [Tooltip("��Ÿ�� ����Ʈ ����, ���� �� ������ ��ġ�� ����")]
     public List<Transform> StartingPositions;
     public Vector2Int mapSize;
 
     NavMeshSurface[] navMeshSurfaces;
 
-    private BlockType[,] mapBlocksList;
-    // Start is called before the first frame update
-    void Awake()
-    {
-        navMeshSurfaces = GetComponentsInChildren<NavMeshSurface>();
+    public MapGenerator mapMaker;
 
-        MapGenerator mapMaker = GetComponent<MapGenerator>();
-        if (mapMaker != null)
+    [Header("New")]
+    public PrefebManager prefebManager;
+    public GameObject mapParent;
+    private List<GameObject> generatedEntities = new List<GameObject>();
+    public Camera gameCamera;
+
+    private bool isMapGenerated = false;
+    private bool islocated = false;
+
+    public void Awake()
+    {
+        mapMaker = GetComponent<MapGenerator>();
+        if (mapMaker == null)
         {
-            mapMaker.Initialize();
-            mapBlocksList = mapMaker.mapBlocksList;
+            mapMaker = gameObject.AddComponent<DynamicMapGenerator>();
         }
-        else GenerateDynamicMap();
+        navMeshSurfaces = GetComponentsInChildren<NavMeshSurface>();
+    }
+
+    public void GenerateMap()
+    {
+        StartCoroutine(GenerateMapCoroutine());//비동기 문제가 있어 코루틴으로 gameClear가 완전히 끝날 때까지 기다림
+    }
+
+    private IEnumerator GenerateMapCoroutine()
+    {
+        gameClear();
+
+        // gameClear가 완전히 끝날 때까지 기다림
+        yield return new WaitForEndOfFrame();
+
+        mapMaker.Initialize();
 
         foreach (var surface in navMeshSurfaces)
         {
             surface.BuildNavMesh();
         }
 
-        PlaceEntities();
+        isMapGenerated = true;
+        Relocation();
     }
-    public void GenerateDynamicMap()
+
+    public void gameClear()
     {
-        // Find all game objects with block tags
-        GameObject[] allBlocks = GameObject.FindGameObjectsWithTag("Floor")
-            .Concat(GameObject.FindGameObjectsWithTag("Wall"))
-            .Concat(GameObject.FindGameObjectsWithTag("Hallway"))
-            .Concat(GameObject.FindGameObjectsWithTag("Door"))
-            .ToArray();
-
-        if (allBlocks.Length == 0)
+        foreach (var surface in navMeshSurfaces)
         {
-            Debug.LogError("No blocks found in the scene.");
-            return;
+            surface.RemoveData();
         }
 
-        // Determine the map size based on the found blocks
-        Vector3 minBounds = allBlocks[0].transform.position;
-        Vector3 maxBounds = allBlocks[0].transform.position;
-
-        foreach (var block in allBlocks)
+        mapMaker.ClearMap();
+        ClearEntity();
+        isMapGenerated = false;
+        islocated = false;
+    }
+    public void GameStart()
+    {
+        if (isMapGenerated && islocated)
         {
-            Vector3 position = block.transform.position;
-            if (position.x < minBounds.x) minBounds.x = position.x;
-            if (position.y < minBounds.y) minBounds.y = position.y;
-            if (position.z < minBounds.z) minBounds.z = position.z;
-            if (position.x > maxBounds.x) maxBounds.x = position.x;
-            if (position.y > maxBounds.y) maxBounds.y = position.y;
-            if (position.z > maxBounds.z) maxBounds.z = position.z;
-        }
-
-        int mapWidth = Mathf.CeilToInt(maxBounds.x - minBounds.x) + 1;
-        int mapHeight = Mathf.CeilToInt(maxBounds.z - minBounds.z) + 1;
-        mapSize = new Vector2Int(mapWidth, mapHeight);
-        // Initialize the mapBlocksList with Empty blocks
-        mapBlocksList = new BlockType[mapWidth, mapHeight];
-
-        for (int x = 0; x < mapWidth; x++)
-        {
-            for (int y = 0; y < mapHeight; y++)
+            foreach (var entity in generatedEntities)
             {
-                mapBlocksList[x, y] = BlockType.Empty; // Default to Empty
-            }
-        }
-
-        // Assign block types based on the tags
-        foreach (var block in allBlocks)
-        {
-            Vector3 position = block.transform.position;
-            int x = Mathf.RoundToInt(position.x - minBounds.x);
-            int y = Mathf.RoundToInt(position.z - minBounds.z);
-
-            switch (block.tag)
-            {
-                case "Floor":
-                    mapBlocksList[x, y] = BlockType.Floor;
-                    break;
-                case "Wall":
-                    mapBlocksList[x, y] = BlockType.Wall;
-                    break;
-                case "Hallway":
-                    mapBlocksList[x, y] = BlockType.Hallway;
-                    break;
-                case "Door":
-                    mapBlocksList[x, y] = BlockType.Door;
-                    break;
-                default:
-                    mapBlocksList[x, y] = BlockType.Empty;
-                    break;
+                entity.GetComponent<CharacterBase>().Initialize(); // 플레이어 초기화
             }
         }
     }
+    public void Relocation()
+    {
+        if (isMapGenerated)
+        {
+            ClearEntity();
+            PlaceEntities();
+            islocated = true;
+        }
+    }
 
+    public void ClearEntity()
+    {
+        // 현재 게임 오브젝트 또는 자식 오브젝트에 있는 모든 LineRenderer 컴포넌트를 찾음
+        LineRenderer[] lineRenderers = GetComponentsInChildren<LineRenderer>();
+
+        // 모든 LineRenderer를 제거
+        foreach (LineRenderer lineRenderer in lineRenderers)
+        {
+            Destroy(lineRenderer);
+        }
+        foreach (GameObject Entity in generatedEntities)
+        {
+            if (Entity != null)
+            {
+                Destroy(Entity);
+            }
+        }
+
+        // 리스트를 비움
+        generatedEntities.Clear();
+    }
     private void PlaceEntities()
     {
-        for (int i = 0; i < Entities.Count; i++)
+        // 1. 플레이어 프리팹 생성
+        GameObject playerPrefab = prefebManager.GetPlayerPrefab(0); // 플레이어 프리팹 가져오기 (0번 인덱스 사용)
+        if (playerPrefab != null)
         {
-            Vector3 position;
-            if (i < StartingPositions.Count && StartingPositions[i] != null)
-            {
-                // �̸� ������ ��ġ�� �ִ� ��� �ش� ��ġ ���
-                position = StartingPositions[i].position;
-            }
-
-            else
-            {
-                // �̸� ������ ��ġ�� ���� ��� ���� ��ġ ���
-                position = GetRandomNavMeshPosition();
-            }
-
-            GameObject entity = Instantiate(Entities[i], position, Quaternion.identity);
-            entity.GetComponent<CharacterBase>().Initialize();
+            // 플레이어가 시작할 위치 (첫 번째 StartingPosition 사용)
+            Vector3 playerPosition = GetRandomNavMeshPosition();
+            GameObject player = Instantiate(playerPrefab, playerPosition, Quaternion.identity);
+            generatedEntities.Add(player);
+            //player.GetComponent<CharacterBase>().Initialize(); // 플레이어 초기화
         }
+
+        // 2. AI 프리팹 생성
+        foreach (var aiController in prefebManager.aiCountControllers)
+        {
+            GameObject aiPrefab = aiController.Prefab;  // AI 프리팹 가져오기
+            int aiCount = aiController.buttonController.GetValue();  // 각 AI 타입별로 몇 개를 생성할지 가져오기
+            if (aiPrefab != null && aiCount > 0)
+            {
+                for (int j = 0; j < aiCount; j++)
+                {
+                    // AI가 시작할 위치
+                    Vector3 aiPosition = GetRandomNavMeshPosition();
+                    GameObject ai = Instantiate(aiPrefab, aiPosition, Quaternion.identity);
+                    generatedEntities.Add(ai);
+                    //ai.GetComponent<CharacterBase>().Initialize();  // AI 초기화
+                }
+            }
+        }
+
     }
 
     private Vector3 GetRandomNavMeshPosition()
     {
         Vector3 randomPosition = new Vector3(
-            Random.Range(0, mapBlocksList.GetLength(0)),
+            Random.Range(0, mapMaker.mapBlocksList.GetLength(0)),
             0,
-            Random.Range(0, mapBlocksList.GetLength(1))
+            Random.Range(0, mapMaker.mapBlocksList.GetLength(1))
         );
 
         NavMeshHit hit;
@@ -146,15 +187,5 @@ public class GameManager : MonoBehaviour
         }
 
         return GetRandomNavMeshPosition();
-    }
-
-    public void SetMapBlocksList(BlockType[,] blocks)
-    {
-        mapBlocksList = blocks;
-    }
-
-    public BlockType[,] getMapBlocksList()
-    {
-        return mapBlocksList;
     }
 }

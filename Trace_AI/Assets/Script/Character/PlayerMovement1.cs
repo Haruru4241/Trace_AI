@@ -6,23 +6,33 @@ using UnityEngine.EventSystems;
 public class PlayerMovement1 : CharacterBase
 {
     private AudioSource audioSource;
-    public AudioClip[] movementSounds; // ¿©·¯ ¼Ò¸® Å¬¸³À» ÀúÀåÇÒ ¹è¿­
+    public AudioClip[] movementSounds; // ï¿½ï¿½ï¿½ï¿½ ï¿½Ò¸ï¿½ Å¬ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½è¿­
 
     private NavMeshAgent agent;
+    private bool isGameStarted = false;
 
-    public override void Initialize()
+    public void Awake()
     {
-        base.Initialize();
-
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.loop = false;
 
         agent = gameObject.GetComponent<NavMeshAgent>();
     }
+    public override void Initialize()
+    {
+        if (!isGameStarted)
+        {
+            isGameStarted = true;
+            base.Initialize();
+        }
+
+
+    }
 
     void Update()
     {
-        float moveHorizontal = Input.GetAxis("Horizontal"); //WASD ÀÔ·ÂÀ¸·Î NavMeshAgentÀ» ÀÌ¿ëÇØ ÀÌµ¿
+        if (!isGameStarted) return;
+        float moveHorizontal = Input.GetAxis("Horizontal"); //WASD ï¿½Ô·ï¿½ï¿½ï¿½ï¿½ï¿½ NavMeshAgentï¿½ï¿½ ï¿½Ì¿ï¿½ï¿½ï¿½ ï¿½Ìµï¿½
         float moveVertical = Input.GetAxis("Vertical");
 
         Vector3 moveDirection = new Vector3(moveHorizontal, 0.0f, moveVertical).normalized;
@@ -38,10 +48,10 @@ public class PlayerMovement1 : CharacterBase
         {
             if (movementSounds.Length > 0)
             {
-                int randomIndex = Random.Range(0, movementSounds.Length); //ºÒ±ÔÄ¢ÇÑ ¹ß¼Ò¸® »ý¼ºÀ» À§ÇØ ·£´ý ¼±ÅÃ
+                int randomIndex = Random.Range(0, movementSounds.Length); //ï¿½Ò±ï¿½Ä¢ï¿½ï¿½ ï¿½ß¼Ò¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
                 audioSource.clip = movementSounds[randomIndex];
                 audioSource.Play();
-                GameEventSystem.RaiseSoundDetected(transform); //¼Ò¸® °¨Áö¸¦ À§ÇØ ¹ß¼Ò¸® À§Ä¡ Á¦°ø
+                GameEventSystem.RaiseSoundDetected(transform); //ï¿½Ò¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ß¼Ò¸ï¿½ ï¿½ï¿½Ä¡ ï¿½ï¿½ï¿½ï¿½
             }
         }
         else if (!isMoving && audioSource.isPlaying)
@@ -53,6 +63,6 @@ public class PlayerMovement1 : CharacterBase
     public override void UpdateSpeed(float value)
     {
         currentMoveSpeed = value;
-        if (agent != null) agent.speed = value;//agent¿¡ ½ºÇÇµå °ª ÀÔ·Â
+        if (agent != null) agent.speed = value;//agentï¿½ï¿½ ï¿½ï¿½ï¿½Çµï¿½ ï¿½ï¿½ ï¿½Ô·ï¿½
     }
 }

@@ -20,7 +20,7 @@ public class Boundary : MoveBase
 
         GameObject gameManagerObject = GameObject.Find("GameManager");
         GameManager gameManager = gameManagerObject.GetComponent<GameManager>();
-        mapBlocksList = gameManager.getMapBlocksList();
+        mapBlocksList = gameManager.mapMaker.mapBlocksList;
 
         int width = mapBlocksList.GetLength(0);
         int height = mapBlocksList.GetLength(1);
@@ -38,7 +38,7 @@ public class Boundary : MoveBase
 
     public override void Enter()
     {
-        Debug.Log($"{transform.name} °æ°è »óÅÂ ÁøÀÔ, ¸ñÇ¥: {targetPosition}");
+        Debug.Log($"{transform.name} ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½Ç¥: {targetPosition}");
         Vector2Int lastPosition = new Vector2Int((int)ai.targetList.First().Key.position.x, (int)ai.targetList.First().Key.position.z);
         UpdateWeightMap(WeightTableType.LastPosition, lastPosition, 3, 10, 0);
 
@@ -68,7 +68,7 @@ public class Boundary : MoveBase
 
     public override void Exit()
     {
-        Debug.Log($"{transform.name} °æ°è »óÅÂ Å»Ãâ");
+        Debug.Log($"{transform.name} ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Å»ï¿½ï¿½");
         fsm.SetState<Patrol>();
     }
 
@@ -89,7 +89,7 @@ public class Boundary : MoveBase
         weightTables[WeightTableType.Visited].InitializeValues();
         weightTables[WeightTableType.EndPosition].InitializeValues();
 
-        Debug.Log($"{transform.name} °æ°è ¸ñÇ¥ Àç¼³Á¤: {targetPosition}");
+        Debug.Log($"{transform.name} ï¿½ï¿½ï¿½ ï¿½ï¿½Ç¥ ï¿½ç¼³ï¿½ï¿½: {targetPosition}");
     }
 
     public override Vector3 TraceTargetPosition()
@@ -190,7 +190,7 @@ public class Boundary : MoveBase
                 if (weight > highestWeight)
                 {
                     highestWeight = weight;
-                    bestEndPoints.Clear(); // ÃÖ°í °¡ÁßÄ¡ °»½Å ½Ã ¸®½ºÆ® ÃÊ±âÈ­
+                    bestEndPoints.Clear(); // ï¿½Ö°ï¿½ ï¿½ï¿½ï¿½ï¿½Ä¡ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ® ï¿½Ê±ï¿½È­
                     bestEndPoints.Add(new Vector2Int(x, y));
                 }
                 else if (weight == highestWeight) bestEndPoints.Add(new Vector2Int(x, y));
@@ -308,9 +308,9 @@ public class WeightTable
     {
         string name = this.ToString();
         string allValues = "";
-        for (int i = Values.GetLength(1) - 1; i >= 0; i--) // ¾Æ·¡¿¡¼­ À§·Î
+        for (int i = Values.GetLength(1) - 1; i >= 0; i--) // ï¿½Æ·ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         {
-            for (int j = 0; j < Values.GetLength(1); j++) // ¿ÞÂÊ¿¡¼­ ¿À¸¥ÂÊÀ¸·Î
+            for (int j = 0; j < Values.GetLength(1); j++) // ï¿½ï¿½ï¿½Ê¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             {
                 string valueStr = Values[j, i].ToString();
                 if (Boundary.mapBlocksList[j, i] == BlockType.Empty)
@@ -321,11 +321,11 @@ public class WeightTable
                 {
                     valueStr = Values[j, i].ToString();
                 }
-                int padding = 3 - valueStr.Length; // ÃÑ 3Ä­À» ¸ÂÃß±â À§ÇÑ ÆÐµù °è»ê
-                allValues += valueStr + new string(' ', padding > 0 ? padding : 0); // ÇÊ¿äÇÑ °ø¹é Ãß°¡
+                int padding = 3 - valueStr.Length; // ï¿½ï¿½ 3Ä­ï¿½ï¿½ ï¿½ï¿½ï¿½ß±ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ðµï¿½ ï¿½ï¿½ï¿½
+                allValues += valueStr + new string(' ', padding > 0 ? padding : 0); // ï¿½Ê¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ß°ï¿½
             }
-            allValues += "\n"; // Çà ³¡¿¡¼­ ÁÙ ¹Ù²Þ Ãß°¡
+            allValues += "\n"; // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ù²ï¿½ ï¿½ß°ï¿½
         }
-        Debug.Log(allValues.TrimEnd()); // ¸¶Áö¸· ÁÙ ¹Ù²Þ Á¦°Å
+        Debug.Log(allValues.TrimEnd()); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ù²ï¿½ ï¿½ï¿½ï¿½ï¿½
     }
 }

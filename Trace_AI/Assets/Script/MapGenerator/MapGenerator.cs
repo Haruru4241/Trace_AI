@@ -24,7 +24,14 @@ public abstract class MapGenerator : MonoBehaviour
 
     protected HashSet<(Room, Room)> connectedRooms = new HashSet<(Room, Room)>();
 
+    private List<GameObject> generatedBlocks = new List<GameObject>();
+
     public abstract void Initialize();
+
+    protected void SetCamera(int size){
+        GameManager.Instance.gameCamera.orthographicSize=size/2;
+        GameManager.Instance.gameCamera.transform.position=new Vector3(size/2,30,size/2);
+    }
 
     protected BlockType GetHighestPriorityBlock(List<BlockType> blocks)
     {
@@ -101,13 +108,13 @@ public abstract class MapGenerator : MonoBehaviour
 
     protected void ConnectRooms()
     {
-        // ¼øÂ÷ÀûÀ¸·Î ¹æÀ» ¹­¾î¼­ ¿¬°á Á¤º¸ ÀúÀå
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½î¼­ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         for (int i = 0; i < rooms.Count - 1; i++)
         {
             connectedRooms.Add((rooms[i], rooms[i + 1]));
         }
 
-        // È®·üÀûÀ¸·Î °¡±î¿î ¹æÀ» Ãß°¡·Î ¿¬°á
+        // È®ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ß°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         for (int i = 0; i < rooms.Count; i++)
         {
             Room currentRoom = rooms[i];
@@ -127,7 +134,7 @@ public abstract class MapGenerator : MonoBehaviour
                 }
             }
 
-            // n% È®·ü·Î °¡Àå °¡±î¿î ¹æÀ» ¿¬°á
+            // n% È®ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
             if (closestRoom != null && Random.value < secondClosestProbability)
             {
                 connectedRooms.Add((currentRoom, closestRoom));
@@ -144,7 +151,7 @@ public abstract class MapGenerator : MonoBehaviour
         Vector2Int bestStartPos = Vector2Int.zero;
         Vector2Int bestEndPos = Vector2Int.zero;
 
-        // ¹® ÈÄº¸Áö °£ °Å¸® °è»ê
+        // ï¿½ï¿½ ï¿½Äºï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Å¸ï¿½ ï¿½ï¿½ï¿½
         foreach (Vector2Int startPos in startCandidates)
         {
             foreach (Vector2Int endPos in endCandidates)
@@ -160,11 +167,11 @@ public abstract class MapGenerator : MonoBehaviour
         }
         mapBlocks[bestStartPos.x, bestStartPos.y].Add(BlockType.Door);
         mapBlocks[bestEndPos.x, bestEndPos.y].Add(BlockType.Door);
-        // ÃÖ´Ü °Å¸®ÀÇ ¹® ÈÄº¸Áö¸¦ ±âÁØÀ¸·Î º¹µµ »ı¼º
+        // ï¿½Ö´ï¿½ ï¿½Å¸ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Äºï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         List<Vector2Int> path = FindPathBFS(bestStartPos, bestEndPos);
         if (path != null)
         {
-            // º¹µµ Å¸ÀÏ Ãß°¡
+            // ï¿½ï¿½ï¿½ï¿½ Å¸ï¿½ï¿½ ï¿½ß°ï¿½
             foreach (Vector2Int pos in path)
             {
                 mapBlocks[pos.x, pos.y].Add(BlockType.Hallway);
@@ -177,16 +184,16 @@ public abstract class MapGenerator : MonoBehaviour
         List<Vector2Int> candidates = new List<Vector2Int>();
         RectInt rect = room.rect;
 
-        // ¹æ ¾ÈÂÊÀÇ ·£´ıÇÑ À§Ä¡¸¦ ÀâÀ½
+        // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         int randomX = Random.Range(rect.x + 1, rect.x + rect.width - 1);
         int randomY = Random.Range(rect.y + 1, rect.y + rect.height - 1);
         Vector2Int randomPosition = new Vector2Int(randomX, randomY);
 
-        // ·£´ıÇÑ À§Ä¡¿¡¼­ »óÇÏÁÂ¿ì °¡ÀåÀÚ¸®¿¡ µµ´ŞÇÏ´Â ¹® ÈÄº¸Áö Ãß°¡
-        candidates.Add(new Vector2Int(rect.x, randomPosition.y)); // ¿ŞÂÊ °¡ÀåÀÚ¸®
-        candidates.Add(new Vector2Int(rect.x + rect.width, randomPosition.y)); // ¿À¸¥ÂÊ °¡ÀåÀÚ¸®
-        candidates.Add(new Vector2Int(randomPosition.x, rect.y)); // ¾Æ·¡ÂÊ °¡ÀåÀÚ¸®
-        candidates.Add(new Vector2Int(randomPosition.x, rect.y + rect.height)); // À§ÂÊ °¡ÀåÀÚ¸®
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Â¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ú¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ ï¿½Äºï¿½ï¿½ï¿½ ï¿½ß°ï¿½
+        candidates.Add(new Vector2Int(rect.x, randomPosition.y)); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ú¸ï¿½
+        candidates.Add(new Vector2Int(rect.x + rect.width, randomPosition.y)); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ú¸ï¿½
+        candidates.Add(new Vector2Int(randomPosition.x, rect.y)); // ï¿½Æ·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ú¸ï¿½
+        candidates.Add(new Vector2Int(randomPosition.x, rect.y + rect.height)); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ú¸ï¿½
 
         return candidates;
     }
@@ -227,12 +234,12 @@ public abstract class MapGenerator : MonoBehaviour
             }
         }
 
-        return null; // °æ·Î¸¦ Ã£Áö ¸øÇÑ °æ¿ì
+        return null; // ï¿½ï¿½Î¸ï¿½ Ã£ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
     }
 
     protected List<Vector2Int> GetValidNeighbors(Vector2Int position)
     {
-        // 10. °¡·Î ¹× ¼¼·Î ¹æÇâÀ¸·Î¸¸ ÀÌ¿ô ³ëµå »ı¼º
+        // 10. ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î¸ï¿½ ï¿½Ì¿ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         List<Vector2Int> neighbors = new List<Vector2Int>
     {
         new Vector2Int(position.x + 1, position.y),
@@ -241,15 +248,15 @@ public abstract class MapGenerator : MonoBehaviour
         new Vector2Int(position.x, position.y - 1)
     };
 
-        // 11. º®°ú Á¢ÃËÇÏÁö ¾Ê´Â ÀÌ¿ô ³ëµå¸¸ ¹İÈ¯
+        // 11. ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê´ï¿½ ï¿½Ì¿ï¿½ ï¿½ï¿½å¸¸ ï¿½ï¿½È¯
         neighbors.RemoveAll(neighbor => IsTouchingWall(neighbor));
         return neighbors;
     }
 
     protected bool IsTouchingWall(Vector2Int position)
     {
-        int x=position.x;
-        int y=position.y;
+        int x = position.x;
+        int y = position.y;
 
         if (IsWithinBounds(x, y))
         {
@@ -259,51 +266,51 @@ public abstract class MapGenerator : MonoBehaviour
                 return true;
             }
             return false;
-        } return true;
+        }
+        return true;
     }
 
     protected void DrawLine(Vector3 start, Vector3 end)
     {
-        Debug.DrawLine(start, end, Color.red, 100f);
+        Debug.DrawLine(start, end, Color.red, 10f);
     }
-
     protected void DrawMap()
     {
-        GameObject mapParent = new GameObject("Map");
-        GameObject prefabToInstantiate;
         for (int x = 0; x < mapSize; x++)
         {
             for (int z = 0; z < mapSize; z++)
             {
                 BlockType blockToDraw = GetHighestPriorityBlock(mapBlocks[x, z]);
                 mapBlocksList[x, z] = blockToDraw;
-                switch (blockToDraw)
-                {
-                    case BlockType.Floor:
-                        prefabToInstantiate = Instantiate(floorPrefab, new Vector3(x, 0, z), Quaternion.identity);
-                        prefabToInstantiate.transform.parent = mapParent.transform;
-                        break;
-                    case BlockType.Wall:
-                        prefabToInstantiate = Instantiate(wallPrefab, new Vector3(x, 0, z), Quaternion.identity);
-                        prefabToInstantiate.transform.parent = mapParent.transform;
-                        break;
-                    case BlockType.Hallway:
-                        prefabToInstantiate = Instantiate(hallwayPrefab, new Vector3(x, 0, z), Quaternion.identity);
-                        prefabToInstantiate.transform.parent = mapParent.transform;
-                        break;
-                    case BlockType.Door:
-                        prefabToInstantiate = Instantiate(doorPrefab, new Vector3(x, 0, z), Quaternion.identity);
-                        prefabToInstantiate.transform.parent = mapParent.transform;
-                        break;
-                    default:
-                        //prefabToInstantiate = Instantiate(floorPrefab, new Vector3(x, 0, z), Quaternion.identity);
-                        break;
-                }
 
-                
+                GameObject prefabToInstantiate = GetPrefabForBlockType(blockToDraw);
+                if (prefabToInstantiate != null)
+                {
+                    GameObject instantiatedBlock = Instantiate(prefabToInstantiate, new Vector3(x, 0, z), Quaternion.identity);
+                    instantiatedBlock.transform.parent = GameManager.Instance.mapParent.transform;
+                    generatedBlocks.Add(instantiatedBlock);
+                }
             }
         }
     }
+
+    private GameObject GetPrefabForBlockType(BlockType blockType)
+    {
+        switch (blockType)
+        {
+            case BlockType.Floor:
+                return floorPrefab;
+            case BlockType.Wall:
+                return wallPrefab;
+            case BlockType.Hallway:
+                return hallwayPrefab;
+            case BlockType.Door:
+                return doorPrefab;
+            default:
+                return null; // ê¸°ë³¸ì ìœ¼ë¡œ null ë°˜í™˜ (í•„ìš” ì‹œ ë‹¤ë¥¸ ê¸°ë³¸ê°’ ì„¤ì • ê°€ëŠ¥)
+        }
+    }
+
 
     protected void FillMapBlocksList()
     {
@@ -325,6 +332,32 @@ public abstract class MapGenerator : MonoBehaviour
                 }
             }
         }
+    }
+    public void ClearMap()
+    {
+        // ë§µ ë¸”ë¡ ì´ˆê¸°í™”
+        mapBlocksList = new BlockType[mapSize, mapSize];
+        mapBlocks = new List<BlockType>[mapSize, mapSize];
+        for (int x = 0; x < mapSize; x++)
+        {
+            for (int z = 0; z < mapSize; z++)
+            {
+                mapBlocks[x, z] = new List<BlockType>();
+            }
+        }
+        rooms.Clear(); // ë°© ëª©ë¡ ì´ˆê¸°í™”
+        connectedRooms.Clear(); // ì—°ê²°ëœ ë°© ëª©ë¡ ì´ˆê¸°í™”
+                                // ë¦¬ìŠ¤íŠ¸ì— ìˆëŠ” ëª¨ë“  GameObjectë¥¼ íŒŒê´´
+        foreach (GameObject block in generatedBlocks)
+        {
+            if (block != null)
+            {
+                Destroy(block);
+            }
+        }
+
+        // ë¦¬ìŠ¤íŠ¸ë¥¼ ë¹„ì›€
+        generatedBlocks.Clear();
     }
 
     protected bool IsWithinBounds(int x, int z)

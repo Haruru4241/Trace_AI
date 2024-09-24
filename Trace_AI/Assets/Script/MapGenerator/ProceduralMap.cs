@@ -9,7 +9,9 @@ public class ProceduralMap : MapGenerator
 
     public override void Initialize()
     {
-        Debug.Log("¸Ê »ý¼º ½ÃÀÛ");
+        Debug.Log("ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½");
+        mapSize=GameManager.Instance.prefebManager.GetMapSizeValue();
+        maxDepth=GameManager.Instance.prefebManager.GetMaxDepthValue();
         mapBlocksList = new BlockType[mapSize, mapSize];
         mapBlocks = InitializeMap(mapSize);
         rootNode = new TreeNode(0, 0, mapSize, mapSize);
@@ -18,13 +20,14 @@ public class ProceduralMap : MapGenerator
         FillMapBlocksList();
         ConnectRooms();
 
-        // ÀúÀåµÈ ¿¬°á Á¤º¸¸¦ »ç¿ëÇÏ¿© º¹µµ »ý¼º
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ï¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         foreach (var (start, end) in connectedRooms)
         {
             CreateHallway(start, end);
         }
 
         DrawMap();
+        SetCamera(mapSize);
     }
 
     private List<BlockType>[,] InitializeMap(int size)

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -5,34 +6,39 @@ using UnityEngine.AI;
 
 public class Patrol : MoveBase
 {
-    [Tooltip("2°³ ÀÌ»óÀÇ À§Ä¡¸¦ ¼³Á¤ÇÏ¿© ÇØ´ç À§Ä¡¸¦ ¼øÂû")]
+    [Tooltip("2ï¿½ï¿½ ï¿½Ì»ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï¿ï¿½ ï¿½Ø´ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½")]
     public List<Vector3> patrolPoints;
-  
-    [Tooltip("·£´ý ¼³Á¤ ½Ã »ý¼ºÇÒ À§Ä¡ °¹¼ö")]
+
+    [Tooltip("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ ï¿½ï¿½ï¿½ï¿½")]
     public int RandomPoints = 4;
 
-    [Tooltip("±âÁî¸ð »ö»ó")]
+    [Tooltip("ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½")]
     public Color Color = Color.cyan;
 
     private int patrolIndex;
 
+
     public override void Initialize()
     {
+        
+
+
         base.Initialize();
         if (patrolPoints == null || patrolPoints.Count <= 1)
         {
-            //¼øÂû °æ·Î¸¦ ¼³Á¤ÇÏÁö ¾Ê¾ÒÀ» ½Ã ·£´ýÀ¸·Î °æ·Î ¼³Á¤
+            //ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Î¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¾ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
             patrolPoints = GetRandomNavMeshPosition();
         }
 
         patrolIndex = FindClosestPoint(transform.position, patrolPoints);
+
     }
 
     public override void Enter()
     {
         patrolIndex = FindClosestPoint(transform.position, patrolPoints);
         ai.SetTargetPosition(patrolPoints[patrolIndex]);
-        Debug.Log($"{transform.name} ¼øÂû »óÅÂ ÁøÀÔ, ¸ñÇ¥: {patrolPoints[patrolIndex]}");
+        Debug.Log($"{transform.name} ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½Ç¥: {patrolPoints[patrolIndex]}");
     }
 
     public override void Execute()
@@ -47,13 +53,13 @@ public class Patrol : MoveBase
 
     public override void Exit()
     {
-        Debug.Log($"{transform.name} ¼øÂû »óÅÂ Å»Ãâ");
+        Debug.Log($"{transform.name} ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Å»ï¿½ï¿½");
         fsm.SetState<Trace>();
     }
 
     public override void ArriveTargetPosition()
     {
-        Debug.Log($"{transform.name} ¼øÂû ¸ñÇ¥ Àç¼³Á¤: {patrolPoints[patrolIndex]}");
+        Debug.Log($"{transform.name} ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ç¥ ï¿½ç¼³ï¿½ï¿½: {patrolPoints[patrolIndex]}");
         patrolIndex = (patrolIndex + 1) % patrolPoints.Count;
     }
 
@@ -67,7 +73,7 @@ public class Patrol : MoveBase
         List<Vector3> patrolPoints = new List<Vector3>();
 
         GameManager gameManager = FindObjectOfType<GameManager>();
-        var mapBlocksList= gameManager.getMapBlocksList();
+        var mapBlocksList = gameManager.mapMaker.mapBlocksList;
 
         int count = 10000;
 
@@ -76,9 +82,9 @@ public class Patrol : MoveBase
             count -= 1;
             if (count == 0) return null;
             Vector3 randomPosition = new Vector3(
-            Random.Range(0, mapBlocksList.GetLength(0)),
+            UnityEngine.Random.Range(0, mapBlocksList.GetLength(0)),
             0,
-            Random.Range(0, mapBlocksList.GetLength(1))
+            UnityEngine.Random.Range(0, mapBlocksList.GetLength(1))
         );
 
             NavMeshHit hit;
@@ -86,11 +92,13 @@ public class Patrol : MoveBase
             {
                 patrolPoints.Add((Vector3)hit.position);
             }
-            else i -= 1; 
+            else i -= 1;
         }
 
         return patrolPoints;
     }
+
+
 
     void OnDrawGizmos()
     {

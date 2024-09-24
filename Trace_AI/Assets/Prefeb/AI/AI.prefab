@@ -71,7 +71,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: e79ff2fe684c04a499011cc9309ef177, type: 2}
+  - {fileID: 2100000, guid: 788a238bfdf8ae54ea0216dcbbfbb711, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -263,7 +263,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24a9815018adb744085479082ca04435, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  weightTableTypes: 000000000100000003000000
+  weightTableTypes: []
 --- !u!195 &1693793972714291988
 NavMeshAgent:
   m_ObjectHideFlags: 0
