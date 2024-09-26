@@ -121,17 +121,19 @@ public class GameManager : MonoBehaviour
     public void ClearEntity()
     {
         // 현재 게임 오브젝트 또는 자식 오브젝트에 있는 모든 LineRenderer 컴포넌트를 찾음
-        LineRenderer[] lineRenderers = GetComponentsInChildren<LineRenderer>();
+        //LineRenderer[] lineRenderers = GetComponentsInChildren<LineRenderer>();
 
         // 모든 LineRenderer를 제거
-        foreach (LineRenderer lineRenderer in lineRenderers)
-        {
-            Destroy(lineRenderer);
-        }
+        // foreach (LineRenderer lineRenderer in lineRenderers)
+        // {
+        //     Destroy(lineRenderer);
+        // }
         foreach (GameObject Entity in generatedEntities)
         {
             if (Entity != null)
             {
+                var a=Entity.GetComponent<AI>();
+                if(a!=null)a.ClearAI();
                 Destroy(Entity);
             }
         }

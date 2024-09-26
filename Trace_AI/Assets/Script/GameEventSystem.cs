@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class GameEventArgs : EventArgs
 {
-    public Transform Source { get; } // °´Ã¼ Á¤º¸¸¦ Àü´Þ
+    public Transform Source { get; } // ï¿½ï¿½Ã¼ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
     public GameEventArgs(Transform source)
     {
@@ -14,6 +14,7 @@ public class GameEventArgs : EventArgs
 public static class GameEventSystem
 {
     public static event EventHandler<GameEventArgs> OnSoundDetected;
+    public static event EventHandler<AggroSource> OnAggroDetected;
     public static event EventHandler<GameEventArgs> OnTargetDestroyed;
     public static event Action OnAiAdditionalEvent;
 
@@ -22,7 +23,12 @@ public static class GameEventSystem
         OnSoundDetected?.Invoke(null, new GameEventArgs(source));
     }
 
-    public static void RaiseTargetDestroyed(Transform source) // ÆÄ±« ÀÌº¥Æ® ¹ß»ý ¸Þ¼­µå Ãß°¡
+    public static void RaiseAggroDetected(Transform source)
+    {
+        OnSoundDetected?.Invoke(null, new GameEventArgs(source));
+    }
+
+    public static void RaiseTargetDestroyed(Transform source) // ï¿½Ä±ï¿½ ï¿½Ìºï¿½Æ® ï¿½ß»ï¿½ ï¿½Þ¼ï¿½ï¿½ï¿½ ï¿½ß°ï¿½
     {
         OnTargetDestroyed?.Invoke(null, new GameEventArgs(source));
     }

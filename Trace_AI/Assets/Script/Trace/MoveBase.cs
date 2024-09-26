@@ -33,7 +33,7 @@ public abstract class MoveBase : MonoBehaviour
 
     public abstract void Execute();
 
-    public abstract void Exit();
+    public abstract void Exit(MoveBase newState);
 
     public virtual void Initialize()
     {

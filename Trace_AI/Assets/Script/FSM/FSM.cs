@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OpenCover.Framework.Model;
 using UnityEngine;
 
 public class FSM : MonoBehaviour
@@ -11,7 +12,7 @@ public class FSM : MonoBehaviour
 
     public List<MoveBase> availableStates = new List<MoveBase>();
     public MoveBase currentState;
-
+    [SerializeField] private List<StateTransitionRule> stateTransitionRules;
     public List<DetectionWeight> detectionWeightsList;
     public List<LayerValue> layerValuesList;
 
@@ -36,14 +37,20 @@ public class FSM : MonoBehaviour
         currentState.Enter();
     }
 
+    public void SetState(MoveBase newState)
+    {
+        currentState = newState;
+        currentState.Enter();
+    }
+
     public void UpdateTargetList(List<Detection> detections, ref Dictionary<Transform, float> targetList)
     {
         Dictionary<Transform, float> updateList = new Dictionary<Transform, float>();
 
-        // °¢ Detection °´Ã¼¿¡ ´ëÇØ ¹İº¹
+        // ï¿½ï¿½ Detection ï¿½ï¿½Ã¼ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½İºï¿½
         foreach (var detection in detections)
         {
-            // °¨ÁöµÈ °´Ã¼ ¸®½ºÆ®¸¦ °¡Á®¿È
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã¼ ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             List<Transform> detected = detection.Detect();
 
             string detectionType = detection.GetType().Name;
@@ -54,27 +61,27 @@ public class FSM : MonoBehaviour
                 {
                     if (!updateList.ContainsKey(target) || weight > updateList[target])
                     {
-                        updateList[target] = weight; // ´õ ³ôÀº °¡ÁßÄ¡·Î ¾÷µ¥ÀÌÆ®
+                        updateList[target] = weight; // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®
                     }
                 }
             }
         }
 
-        // 2Â÷ÀûÀ¸·Î Å¸°Ù ¸®½ºÆ® ¾÷µ¥ÀÌÆ®
+        // 2ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®
         foreach (var target in updateList.Keys)
         {
             if (targetList.ContainsKey(target))
             {
-                targetList[target] += updateList[target]; // Á¸ÀçÇÏ¸é °¡ÁßÄ¡ ´õÇÏ±â
-                targetList[target] = Mathf.Min(targetList[target], stateMaxValue); // ÃÖ´ë°ª Á¦ÇÑ
+                targetList[target] += updateList[target]; // ï¿½ï¿½ï¿½ï¿½ï¿½Ï¸ï¿½ ï¿½ï¿½ï¿½ï¿½Ä¡ ï¿½ï¿½ï¿½Ï±ï¿½
+                targetList[target] = Mathf.Min(targetList[target], stateMaxValue); // ï¿½Ö´ë°ª ï¿½ï¿½ï¿½ï¿½
             }
             else
             {
-                targetList[target] = updateList[target]; // Á¸ÀçÇÏÁö ¾ÊÀ¸¸é Ãß°¡
+                targetList[target] = updateList[target]; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ß°ï¿½
             }
         }
 
-        // Å¸°Ù ¸®½ºÆ®¸¦ °ªÀÇ ³»¸²Â÷¼øÀ¸·Î Á¤·Ä
+        // Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         targetList = targetList.OrderByDescending(t => t.Value).ToDictionary(t => t.Key, t => t.Value);
     }
 
@@ -89,10 +96,18 @@ public class FSM : MonoBehaviour
                 targetList[key] -= layerValue;
                 if (targetList[key] <= 0)
                 {
-                    targetList.Remove(key); // ¹ë·ù°¡ 0 ÀÌÇÏ°¡ µÇ¸é ¸®½ºÆ®¿¡¼­ Á¦°Å
+                    targetList.Remove(key); // ï¿½ï¿½ï¿½ï¿½ï¿½ 0 ï¿½ï¿½ï¿½Ï°ï¿½ ï¿½Ç¸ï¿½ ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
                 }
             }
         }
+    }
+    public List<StateTransitionRule> FindStatetargetState(MoveBase currentState)
+    {
+        return stateTransitionRules.Where(rule => rule.targetState == currentState).ToList();
+    }
+    public List<StateTransitionRule> FindStateescapeState(MoveBase currentState)
+    {
+        return stateTransitionRules.Where(rule => rule.escapeState == currentState).ToList();
     }
 
     public void UpdateFSM(List<Detection> Detections, ref Dictionary<Transform, float> targetList)
@@ -116,3 +131,24 @@ public class FSM : MonoBehaviour
     }
 }
 
+[System.Serializable]
+public class StateTransitionRule
+{
+    public MoveBase targetState; // íƒˆì¶œ ì „ ìƒíƒœ
+    public StateCondition ExitCondition; // ìƒíƒœ ì „í™˜ ì¡°ê±´ (ê±°ë¦¬ ë“±)
+    public MoveBase escapeState; // íƒˆì¶œ ì¡°ê±´ ë°œìƒ ì‹œ ì§„ì…í•  ìƒíƒœ
+
+    public StateTransitionRule(MoveBase escapeState, MoveBase targetState, StateCondition ExitCondition)
+    {
+        this.escapeState = escapeState;
+        this.targetState = targetState;
+        this.ExitCondition = ExitCondition;
+    }
+}
+
+public abstract class StateCondition : MonoBehaviour
+{
+    public abstract bool ExitCondition();
+}
+
+// ì¶”ìƒ í´ë˜ìŠ¤ë¥¼ ìƒì†ë°›ëŠ” êµ¬ì²´ì ì¸ ìƒíƒœ ì¡°ê±´

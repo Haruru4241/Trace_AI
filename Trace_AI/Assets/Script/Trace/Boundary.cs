@@ -58,18 +58,27 @@ public class Boundary : MoveBase
             UpdateWeightMap(WeightTableType.Visited, newPosition, 4, -0.3f, 0);
             currentPosition = newPosition;
         }
-
-        if (ai.targetList.Any() && (ai.targetList.First().Value >= fsm.chaseThreshold
-            || ai.targetList.First().Value <= fsm.patrolThreshold))
+        foreach (var rule in fsm.FindStatetargetState(this))
         {
-            Exit();
+            if (rule.ExitCondition.ExitCondition())
+            {
+                Exit(rule.escapeState);
+                break; // 조건이 만족되면 반복 종료
+            }
         }
+
+        // if (ai.targetList.Any() && (ai.targetList.First().Value >= fsm.chaseThreshold
+        //     || ai.targetList.First().Value <= fsm.patrolThreshold))
+        // {
+        //     Exit();
+        // }
     }
 
-    public override void Exit()
+    public override void Exit(MoveBase newState)
     {
         Debug.Log($"{transform.name} ��� ���� Ż��");
-        fsm.SetState<Patrol>();
+        fsm.SetState(newState);
+        //fsm.SetState<Patrol>();
     }
 
     public override void ArriveTargetPosition()

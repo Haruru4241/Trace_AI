@@ -20,9 +20,6 @@ public class Patrol : MoveBase
 
     public override void Initialize()
     {
-        
-
-
         base.Initialize();
         if (patrolPoints == null || patrolPoints.Count <= 1)
         {
@@ -44,17 +41,25 @@ public class Patrol : MoveBase
     public override void Execute()
     {
         if (agent.remainingDistance - agent.stoppingDistance < 0.1f) ArriveTargetPosition();
-
-        if (ai.targetList.Any() && ai.targetList.First().Value > fsm.chaseThreshold)
+        foreach (var rule in fsm.FindStatetargetState(this))
         {
-            Exit();
+            if (rule.ExitCondition.ExitCondition())
+            {
+                Exit(rule.escapeState);
+                break; // 조건이 만족되면 반복 종료
+            }
         }
+        // if (ai.targetList.Any() && ai.targetList.First().Value > fsm.chaseThreshold)
+        // {
+        //     Exit();
+        // }
     }
 
-    public override void Exit()
+    public override void Exit(MoveBase newState)
     {
         Debug.Log($"{transform.name} ���� ���� Ż��");
-        fsm.SetState<Trace>();
+        fsm.SetState(newState);
+        //fsm.SetState<Trace>();
     }
 
     public override void ArriveTargetPosition()

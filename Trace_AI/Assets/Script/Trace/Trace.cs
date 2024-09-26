@@ -8,31 +8,41 @@ public class Trace : MoveBase
     public override void Enter()
     {
         ai.SetTargetPosition(TraceTargetPosition());
-        Debug.Log($"{transform.name} ÃßÀû »óÅÂ ÁøÀÔ, ¸ñÇ¥: {ai.targetList.First().Key.name}");
+        Debug.Log($"{transform.name} ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½Ç¥: {ai.targetList.First().Key.name}");
     }
 
     public override void Execute()
     {
         if (agent.remainingDistance - agent.stoppingDistance < 0.1f) ArriveTargetPosition();
 
-        if (ai.targetList.Any() && ai.targetList.First().Value <= fsm.chaseThreshold)
+        // ì „í™˜ ê·œì¹™ì´ ì¡´ìž¬í•˜ê³ , ê·¸ ì¡°ê±´ì´ ë§Œì¡±ë˜ë©´ ìƒíƒœ íƒˆì¶œ
+        foreach (var rule in fsm.FindStatetargetState(this))
         {
-            Exit();
+            if (rule.ExitCondition.ExitCondition())
+            {
+                Exit(rule.escapeState);
+                break; // ì¡°ê±´ì´ ë§Œì¡±ë˜ë©´ ë°˜ë³µ ì¢…ë£Œ
+            }
         }
+        // if (ai.targetList.Any() && ai.targetList.First().Value <= fsm.chaseThreshold)
+        // {
+        //     Exit();
+        // }
     }
 
-    public override void Exit()
+    public override void Exit(MoveBase newState)
     {
-        Debug.Log($"{transform.name} ÃßÀû »óÅÂ Å»Ãâ");
-        fsm.SetState<Boundary>();
+        Debug.Log($"{transform.name} ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Å»ï¿½ï¿½");
+        fsm.SetState(newState);
+        //fsm.SetState<Boundary>();
     }
 
     public override void ArriveTargetPosition()
     {
         if (ai.targetList.Any())
         {
-            //°ø°Ý °ü·Ã Å¬·¡½º Ãß°¡ ¿¹Á¤
-            Debug.Log($"{transform.name} ¸ñÇ¥ ÃßÀû ¿Ï·á: {ai.targetList.First().Key.name}");
+            //ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Å¬ï¿½ï¿½ï¿½ï¿½ ï¿½ß°ï¿½ ï¿½ï¿½ï¿½ï¿½
+            Debug.Log($"{transform.name} ï¿½ï¿½Ç¥ ï¿½ï¿½ï¿½ï¿½ ï¿½Ï·ï¿½: {ai.targetList.First().Key.name}");
         }
     }
 
@@ -42,6 +52,6 @@ public class Trace : MoveBase
         {
             return ai.targetList.First().Key.position;
         }
-        return transform.position; // Á¦ÀÚ¸® À§Ä¡ ¹ÝÈ¯
+        return transform.position; // ï¿½ï¿½ï¿½Ú¸ï¿½ ï¿½ï¿½Ä¡ ï¿½ï¿½È¯
     }
 }

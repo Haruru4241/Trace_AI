@@ -18,6 +18,7 @@ public class AI : CharacterBase
     private bool isGameStarted = false;
     LineRenderer lineRenderer;
     GameObject targetSphere;  // 목표 구체를 필드로 저장
+    List<GameObject> entities= new List<GameObject>();
     public void Awake()
     {
         m_Agent = GetComponent<NavMeshAgent>();
@@ -30,14 +31,24 @@ public class AI : CharacterBase
         lineRenderer.endWidth = 0.1f;    // 끝 선의 두께
         lineRenderer.material = new Material(Shader.Find("Sprites/Default"));  // 기본 재질 설정
         lineRenderer.positionCount = 2;  // 선을 그릴 두 개의 포인트 필요
-
+        lineRenderer.material.color = Color.blue;
+        
         // 목표 위치에 작은 구체 생성
         targetSphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         targetSphere.transform.position = targetPosition;  // 목표 위치에 구체 배치
         targetSphere.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);  // 구체 크기 설정
         targetSphere.GetComponent<Renderer>().material.color = Color.red;   // 구체 색상 설정 (빨간색)
+        Destroy(targetSphere.GetComponent<Collider>());  // Collider 제거
+        entities.Add(targetSphere);
 
+        m_Agent.avoidancePriority = UnityEngine.Random.Range(1, 1000);
 
+    }
+    public void ClearAI(){
+        foreach(var entity in entities){
+            Destroy(entity);
+        }
+        entities.Clear();
     }
 
     public override void Initialize()
@@ -105,7 +116,6 @@ public class AI : CharacterBase
             targetList.Remove(e.Source);
         }
     }
-
     void UpdateColor()
     {
         float stateValue = 0;
@@ -115,7 +125,18 @@ public class AI : CharacterBase
         }
 
         float t = Mathf.InverseLerp(0, fsm.chaseThreshold, stateValue);
-        AIrenderer.material.color = Color.Lerp(Color.green, Color.red, t);
+
+        // 현재 색상에 빨간색 값을 더해주는 방식
+        Color currentColor = AIrenderer.material.color;
+        Color redValueToAdd = new Color(t, 0, 0); // 빨간색 채널만 추가
+        AIrenderer.material.color = currentColor + redValueToAdd;
+
+        // 색상이 1을 넘지 않도록 clamping 처리
+        AIrenderer.material.color = new Color(
+            Mathf.Clamp01(AIrenderer.material.color.r),
+            Mathf.Clamp01(AIrenderer.material.color.g),
+            Mathf.Clamp01(AIrenderer.material.color.b)
+        );
     }
 
     void OnDrawGizmos()
