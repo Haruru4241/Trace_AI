@@ -8,7 +8,8 @@ public class Trace : MoveBase
     public override void Enter()
     {
         ai.SetTargetPosition(TraceTargetPosition());
-        Debug.Log($"{transform.name} ���� ���� ����, ��ǥ: {ai.targetList.First().Key.name}");
+        ai.projectorManager.ChangeAllProjectorsToChangedColor();
+        Debug.Log($"{transform.name} Trace, Enter: {ai.targetList.First().Key.name}");
     }
 
     public override void Execute()
@@ -24,17 +25,13 @@ public class Trace : MoveBase
                 break; // 조건이 만족되면 반복 종료
             }
         }
-        // if (ai.targetList.Any() && ai.targetList.First().Value <= fsm.chaseThreshold)
-        // {
-        //     Exit();
-        // }
     }
 
     public override void Exit(MoveBase newState)
     {
-        Debug.Log($"{transform.name} ���� ���� Ż��");
+        Debug.Log($"{transform.name} Trace Exit");
+        ai.projectorManager.ChangeAllProjectorsToInitialColor();
         fsm.SetState(newState);
-        //fsm.SetState<Boundary>();
     }
 
     public override void ArriveTargetPosition()
@@ -42,7 +39,7 @@ public class Trace : MoveBase
         if (ai.targetList.Any())
         {
             //���� ���� Ŭ���� �߰� ����
-            Debug.Log($"{transform.name} ��ǥ ���� �Ϸ�: {ai.targetList.First().Key.name}");
+            Debug.Log($"{transform.name} : TraceArrive {ai.targetList.First().Key.name}");
         }
     }
 

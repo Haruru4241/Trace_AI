@@ -4,10 +4,6 @@ using System.Collections.Generic;
 public abstract class MapGenerator : MonoBehaviour
 {
     public int mapSize = 50;
-    public GameObject floorPrefab;
-    public GameObject wallPrefab;
-    public GameObject hallwayPrefab;
-    public GameObject doorPrefab;
 
     public BlockType[,] mapBlocksList;
     protected List<BlockType>[,] mapBlocks;
@@ -17,6 +13,10 @@ public abstract class MapGenerator : MonoBehaviour
     public float maxDivideSize = 0.7f;
     public int minRoomSize = 5;
     public float secondClosestProbability = 0f;
+
+    public int numberOfDummy = 5; // 몇 개의 블록을 생성할지 결정
+    public int numberOfSlowZone = 5; // 몇 개의 블록을 생성할지 결정
+    public int numberOfCoins= 5; // 생성할 코인 수
 
     protected TreeNode rootNode;
 
@@ -28,10 +28,52 @@ public abstract class MapGenerator : MonoBehaviour
 
     public abstract void Initialize();
 
-    protected void SetCamera(int size){
-        GameManager.Instance.gameCamera.orthographicSize=size/2;
-        GameManager.Instance.gameCamera.transform.position=new Vector3(size/2,30,size/2);
+    public List<Vector2Int> FindBlocksOfType(BlockType type)
+    {
+        List<Vector2Int> blocks = new List<Vector2Int>();
+
+        for (int x = 0; x < mapSize; x++)
+        {
+            for (int z = 0; z < mapSize; z++)
+            {
+                // 지정된 타입의 블록만 모음
+                if (mapBlocksList[x, z] == type)
+                {
+                    blocks.Add(new Vector2Int(x, z));
+                }
+            }
+        }
+
+        return blocks;
     }
+
+    public void SpawnRandomBlocks(BlockType type, GameObject blockToSpawn, int numberOfBlocksToSpawn)
+    {
+        List<Vector2Int> availablePositions = FindBlocksOfType(type);
+
+        if (availablePositions.Count == 0)
+        {
+            Debug.LogWarning("해당 타입의 블록을 찾을 수 없습니다.");
+            return;
+        }
+
+        // 요청된 블록 수보다 선택 가능한 좌표가 적으면 그만큼만 생성
+        int blocksToSpawn = Mathf.Min(numberOfBlocksToSpawn, availablePositions.Count);
+
+        for (int i = 0; i < blocksToSpawn; i++)
+        {
+            // 랜덤 위치 선택
+            Vector2Int randomPosition = availablePositions[Random.Range(0, availablePositions.Count)];
+            availablePositions.Remove(randomPosition); // 중복 생성을 막기 위해 선택한 위치는 제거
+
+            // 블록 생성
+            GameObject spawnedBlock = Instantiate(blockToSpawn, new Vector3(randomPosition.x, 0, randomPosition.y), Quaternion.identity);
+            spawnedBlock.transform.parent = GameManager.Instance.entityParent.transform;
+            GameManager.Instance.generatedEntities.Add(spawnedBlock);
+        }
+    }
+
+
 
     protected BlockType GetHighestPriorityBlock(List<BlockType> blocks)
     {
@@ -276,6 +318,7 @@ public abstract class MapGenerator : MonoBehaviour
     }
     protected void DrawMap()
     {
+        GameObject prefabToInstantiate;
         for (int x = 0; x < mapSize; x++)
         {
             for (int z = 0; z < mapSize; z++)
@@ -283,31 +326,43 @@ public abstract class MapGenerator : MonoBehaviour
                 BlockType blockToDraw = GetHighestPriorityBlock(mapBlocks[x, z]);
                 mapBlocksList[x, z] = blockToDraw;
 
-                GameObject prefabToInstantiate = GetPrefabForBlockType(blockToDraw);
+                Quaternion blockRotation = Quaternion.identity;
+
+                switch (blockToDraw)
+                {
+                    case BlockType.Floor:
+                        prefabToInstantiate = GameManager.Instance.prefebManager.floorPrefab;
+                        break;
+                    case BlockType.Wall:
+                        prefabToInstantiate = GameManager.Instance.prefebManager.wallPrefab;
+                        break;
+                    case BlockType.Hallway:
+                        prefabToInstantiate = GameManager.Instance.prefebManager.hallwayPrefab;
+                        break;
+                    case BlockType.Door:
+                        prefabToInstantiate = GameManager.Instance.prefebManager.doorPrefab;
+                        // 문에 대한 방향 처리
+                        if (IsWithinBounds(x, z - 1) && IsWithinBounds(x, z + 1))
+                        {
+                            if (mapBlocks[x, z - 1].Contains(BlockType.Wall) && mapBlocks[x, z + 1].Contains(BlockType.Wall))
+                            {
+                                blockRotation = Quaternion.Euler(0, 90, 0); // 가로 방향 문
+                            }
+                        }
+                        break;
+                    default:
+                        prefabToInstantiate = null; // 기본적으로 null 반환 (필요 시 다른 기본값 설정 가능)
+                        break;
+                }
                 if (prefabToInstantiate != null)
                 {
-                    GameObject instantiatedBlock = Instantiate(prefabToInstantiate, new Vector3(x, 0, z), Quaternion.identity);
+
+                    // 블록 생성
+                    GameObject instantiatedBlock = Instantiate(prefabToInstantiate, new Vector3(x, 0, z), blockRotation);
                     instantiatedBlock.transform.parent = GameManager.Instance.mapParent.transform;
                     generatedBlocks.Add(instantiatedBlock);
                 }
             }
-        }
-    }
-
-    private GameObject GetPrefabForBlockType(BlockType blockType)
-    {
-        switch (blockType)
-        {
-            case BlockType.Floor:
-                return floorPrefab;
-            case BlockType.Wall:
-                return wallPrefab;
-            case BlockType.Hallway:
-                return hallwayPrefab;
-            case BlockType.Door:
-                return doorPrefab;
-            default:
-                return null; // 기본적으로 null 반환 (필요 시 다른 기본값 설정 가능)
         }
     }
 

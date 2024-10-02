@@ -9,7 +9,7 @@ public class ProceduralMap : MapGenerator
 
     public override void Initialize()
     {
-        Debug.Log("�� ���� ����");
+        Debug.Log("Map generated");
         mapSize=GameManager.Instance.prefebManager.GetMapSizeValue();
         maxDepth=GameManager.Instance.prefebManager.GetMaxDepthValue();
         mapBlocksList = new BlockType[mapSize, mapSize];
@@ -27,7 +27,9 @@ public class ProceduralMap : MapGenerator
         }
 
         DrawMap();
-        SetCamera(mapSize);
+        SpawnRandomBlocks(BlockType.Floor, GameManager.Instance.prefebManager.dummyPrefeb, numberOfDummy);
+        SpawnRandomBlocks(BlockType.Floor, GameManager.Instance.prefebManager.slowZonePrefeb, numberOfSlowZone);
+        SpawnRandomBlocks(BlockType.Floor, GameManager.Instance.prefebManager.coinPrefab, numberOfCoins);
     }
 
     private List<BlockType>[,] InitializeMap(int size)
@@ -42,6 +44,4 @@ public class ProceduralMap : MapGenerator
         }
         return map;
     }
-
-
 }

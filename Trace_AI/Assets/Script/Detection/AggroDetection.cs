@@ -4,16 +4,12 @@ using UnityEngine.AI;
 
 public class AggroDetection : Detection
 {
-    public float detectionRange = 15f;   // 감지 범위
-    public float aggroThreshold = 50f;   // 어그로 감지 기준
     public Color gizmoColor = Color.red; // 기즈모 색상
 
     private List<Transform> detectedAggroSources = new List<Transform>(); // 감지된 어그로 소스 목록
-    private NavMeshAgent m_Agent;
 
     private void OnEnable()
     {
-        m_Agent = GetComponent<NavMeshAgent>();
         GameEventSystem.OnAggroDetected += HandleAggroEvent;  // 어그로 감지 이벤트 등록
     }
 
@@ -46,7 +42,7 @@ public class AggroDetection : Detection
     void OnDrawGizmos()
     {
         Gizmos.color = gizmoColor;
-        Gizmos.DrawWireSphere(transform.position, detectionRange);
+        Gizmos.DrawWireSphere(transform.position, Range);
     }
 }
 public class AggroSource

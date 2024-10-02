@@ -122,6 +122,7 @@ public class FSM : MonoBehaviour
     {
         public string detectionType;
         public float value;
+        //public Detection DetectionType;
     }
     [Serializable]
     public class LayerValue

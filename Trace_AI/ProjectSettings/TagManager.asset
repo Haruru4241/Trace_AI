@@ -9,6 +9,7 @@ TagManager:
   - Wall
   - Hallway
   - Door
+  - Dummy
   layers:
   - Default
   - TransparentFX
@@ -22,7 +23,7 @@ TagManager:
   - slowZoneMask
   - Player
   - canDetect
-  - 
+  - AI
   - 
   - 
   - 

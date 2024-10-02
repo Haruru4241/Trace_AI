@@ -14,7 +14,6 @@ public class GameManager : MonoBehaviour
     private static GameManager _instance;
 
     // 싱글톤 인스턴스에 접근할 수 있는 프로퍼티
-    // 싱글톤 인스턴스에 접근할 수 있는 프로퍼티
     public static GameManager Instance
     {
         get
@@ -35,23 +34,53 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public List<GameObject> Entities;
-    [Tooltip("��Ÿ�� ����Ʈ ����, ���� �� ������ ��ġ�� ����")]
-    public List<Transform> StartingPositions;
-    public Vector2Int mapSize;
+    [Header("Navigation Settings")] // NavMesh 관련 섹션
+    [Tooltip("NavMesh Surfaces used for navigation")]
+    private NavMeshSurface[] navMeshSurfaces;  // 네비게이션용 서피스
 
-    NavMeshSurface[] navMeshSurfaces;
+    [Header("Map Settings")] // 맵 생성 관련 섹션
+    [Tooltip("Reference to the MapGenerator object")]
+    public MapGenerator mapMaker;  // 맵 생성기 참조
 
-    public MapGenerator mapMaker;
+    [Space(10)] // 10픽셀 간격 추가
+    [Header("Prefab and Entity Management")] // 프리팹 및 엔티티 관리 섹션
+    [Tooltip("Reference to the Prefab Manager")]
+    public PrefebManager prefebManager;  // 프리팹 매니저
 
-    [Header("New")]
-    public PrefebManager prefebManager;
-    public GameObject mapParent;
-    private List<GameObject> generatedEntities = new List<GameObject>();
-    public Camera gameCamera;
+    [Tooltip("Parent object for the generated map")]
+    public GameObject mapParent;  // 생성된 맵을 부모로 할 오브젝트
 
-    private bool isMapGenerated = false;
-    private bool islocated = false;
+    [Tooltip("Parent object for generated entities")]
+    public GameObject entityParent;  // 생성된 엔티티들의 부모 오브젝트
+
+    [Tooltip("List of all generated entities")]
+    public List<GameObject> generatedEntities = new List<GameObject>();  // 생성된 엔티티 목록
+
+    [Header("Camera Settings")] // 카메라 관련 섹션
+    [Tooltip("Main game camera")]
+    public Camera gameCamera;  // 게임 카메라
+
+    [Tooltip("Controller for the main camera")]
+    public CameraController cameraController;  // 카메라 컨트롤러
+
+    [Header("Tooltip Manager")] // 툴팁 매니저 섹션
+    [Tooltip("Manages tooltips in the game")]
+    public TooltipManager tooltipManager;  // 툴팁 매니저
+
+    [Space(10)] // 10픽셀 간격 추가
+    [Header("Game States and Debug")] // 게임 상태 및 디버그 관련 섹션
+    [Tooltip("Is the map generated?")]
+    public bool isMapGenerated = false;  // 맵이 생성되었는지 여부
+
+    [Tooltip("Is the player located?")]
+    public bool islocated = false;  // 플레이어의 위치 여부
+
+    [Tooltip("Total collected coins")]
+    [SerializeField]
+    private int collectedCoins = 0;  // 수집된 코인의 수 (비공개)
+
+    [Tooltip("Enable or disable debug mode")]
+    public bool isDebugMode = true;  // 디버그 모드
 
     public void Awake()
     {
@@ -61,6 +90,22 @@ public class GameManager : MonoBehaviour
             mapMaker = gameObject.AddComponent<DynamicMapGenerator>();
         }
         navMeshSurfaces = GetComponentsInChildren<NavMeshSurface>();
+    }
+
+    public void CoinCollected()
+    {
+        collectedCoins++; // 수집된 코인 개수 증가
+        tooltipManager.ShowTooltip($"Coins: {collectedCoins}/{mapMaker.numberOfCoins}", null, Vector3.zero); // 스프라이트는 null로 설정
+
+
+        // 모든 코인을 수집했는지 확인
+        if (collectedCoins >= mapMaker.numberOfCoins)
+        {
+            DebugLog("모든 코인을 수집했습니다. 승리!");
+
+            // 승리 툴팁 메시지로 "굿"을 표시
+            tooltipManager.ShowTooltip("Good! You've collected all the coins!", null, Vector3.zero);
+        }
     }
 
     public void GenerateMap()
@@ -76,6 +121,7 @@ public class GameManager : MonoBehaviour
         yield return new WaitForEndOfFrame();
 
         mapMaker.Initialize();
+        cameraController.SetCamera(mapMaker.mapSize);
 
         foreach (var surface in navMeshSurfaces)
         {
@@ -83,7 +129,8 @@ public class GameManager : MonoBehaviour
         }
 
         isMapGenerated = true;
-        Relocation();
+        islocated = true;
+        PlaceEntities();
     }
 
     public void gameClear()
@@ -104,7 +151,8 @@ public class GameManager : MonoBehaviour
         {
             foreach (var entity in generatedEntities)
             {
-                entity.GetComponent<CharacterBase>().Initialize(); // 플레이어 초기화
+                var Character = entity.GetComponent<CharacterBase>();
+                if (Character != null) Character.Initialize(); // 플레이어 초기화
             }
         }
     }
@@ -120,20 +168,12 @@ public class GameManager : MonoBehaviour
 
     public void ClearEntity()
     {
-        // 현재 게임 오브젝트 또는 자식 오브젝트에 있는 모든 LineRenderer 컴포넌트를 찾음
-        //LineRenderer[] lineRenderers = GetComponentsInChildren<LineRenderer>();
-
-        // 모든 LineRenderer를 제거
-        // foreach (LineRenderer lineRenderer in lineRenderers)
-        // {
-        //     Destroy(lineRenderer);
-        // }
         foreach (GameObject Entity in generatedEntities)
         {
             if (Entity != null)
             {
-                var a=Entity.GetComponent<AI>();
-                if(a!=null)a.ClearAI();
+                var a = Entity.GetComponent<AI>();
+                if (a != null) a.ClearAI();
                 Destroy(Entity);
             }
         }
@@ -150,8 +190,8 @@ public class GameManager : MonoBehaviour
             // 플레이어가 시작할 위치 (첫 번째 StartingPosition 사용)
             Vector3 playerPosition = GetRandomNavMeshPosition();
             GameObject player = Instantiate(playerPrefab, playerPosition, Quaternion.identity);
+            player.transform.parent = entityParent.transform;
             generatedEntities.Add(player);
-            //player.GetComponent<CharacterBase>().Initialize(); // 플레이어 초기화
         }
 
         // 2. AI 프리팹 생성
@@ -166,8 +206,8 @@ public class GameManager : MonoBehaviour
                     // AI가 시작할 위치
                     Vector3 aiPosition = GetRandomNavMeshPosition();
                     GameObject ai = Instantiate(aiPrefab, aiPosition, Quaternion.identity);
+                    ai.transform.parent = entityParent.transform;
                     generatedEntities.Add(ai);
-                    //ai.GetComponent<CharacterBase>().Initialize();  // AI 초기화
                 }
             }
         }
@@ -189,5 +229,12 @@ public class GameManager : MonoBehaviour
         }
 
         return GetRandomNavMeshPosition();
+    }
+    public void DebugLog(string message)
+    {
+        if (isDebugMode)
+        {
+            Debug.Log(message); // 디버그 모드가 켜져 있을 때만 로그 출력
+        }
     }
 }

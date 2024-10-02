@@ -4,8 +4,7 @@ using UnityEngine.AI;
 
 public class SoundDetection : Detection
 {
-    public float hearingRange = 10f;
-    [Tooltip("±âÁî¸ð »ö»ó")]
+    [Tooltip("ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½")]
     public Color gizmoColor = Color.magenta;
 
     private List<Transform> detectedSoundSources = new List<Transform>();
@@ -25,7 +24,7 @@ public class SoundDetection : Detection
     private void HandleGameEvent(object sender, GameEventArgs e)
     {
         Transform source = e.Source;
-        if (Vector3.Distance(transform.position, source.position) <= hearingRange)
+        if (Vector3.Distance(transform.position, source.position) <= Range)
         {
             detectedSoundSources.Add(source);
         }
@@ -45,14 +44,14 @@ public class SoundDetection : Detection
         foreach (var source in detectedSoundSources)
         {
             m_Agent.destination = source.position;
-            if (m_Agent.remainingDistance < hearingRange)
+            if (m_Agent.remainingDistance < Range)
             {
                 detectedObjects.Add(source);
             }
         }
 
         m_Agent.destination = originalDestination;
-        detectedSoundSources.Clear(); // °¨Áö ÈÄ ¸®½ºÆ® ÃÊ±âÈ­
+        detectedSoundSources.Clear(); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ® ï¿½Ê±ï¿½È­
 
         return detectedObjects;
     }
@@ -60,6 +59,6 @@ public class SoundDetection : Detection
     void OnDrawGizmos()
     {
         Gizmos.color = gizmoColor;
-        Gizmos.DrawWireSphere(transform.position, hearingRange);
+        Gizmos.DrawWireSphere(transform.position, Range);
     }
 }

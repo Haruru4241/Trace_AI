@@ -10,6 +10,8 @@ public class AI : CharacterBase
     public List<Detection> Detections;
 
     public Dictionary<Transform, float> targetList = new Dictionary<Transform, float>();
+
+    public TransformFloatPair showtargetList = new TransformFloatPair();
     public Vector3 targetPosition;
 
     Renderer AIrenderer;
@@ -18,7 +20,9 @@ public class AI : CharacterBase
     private bool isGameStarted = false;
     LineRenderer lineRenderer;
     GameObject targetSphere;  // 목표 구체를 필드로 저장
-    List<GameObject> entities= new List<GameObject>();
+    List<GameObject> entities = new List<GameObject>();
+    public float stateValue = 0f;
+    public ProjectorManager projectorManager;
     public void Awake()
     {
         m_Agent = GetComponent<NavMeshAgent>();
@@ -32,7 +36,7 @@ public class AI : CharacterBase
         lineRenderer.material = new Material(Shader.Find("Sprites/Default"));  // 기본 재질 설정
         lineRenderer.positionCount = 2;  // 선을 그릴 두 개의 포인트 필요
         lineRenderer.material.color = Color.blue;
-        
+
         // 목표 위치에 작은 구체 생성
         targetSphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         targetSphere.transform.position = targetPosition;  // 목표 위치에 구체 배치
@@ -42,10 +46,11 @@ public class AI : CharacterBase
         entities.Add(targetSphere);
 
         m_Agent.avoidancePriority = UnityEngine.Random.Range(1, 1000);
-
     }
-    public void ClearAI(){
-        foreach(var entity in entities){
+    public void ClearAI()
+    {
+        foreach (var entity in entities)
+        {
             Destroy(entity);
         }
         entities.Clear();
@@ -68,9 +73,21 @@ public class AI : CharacterBase
     void FixedUpdate()
     {
         if (!isGameStarted) return;
+
+        if (targetList.Count > 0)
+        {
+            // Dictionary의 첫 번째 항목을 가져오기
+            foreach (var target in targetList)
+            {
+                showtargetList.target = target.Key;
+                showtargetList.value = target.Value;
+                break; // 첫 번째 항목만 가져오므로 루프를 종료
+            }
+        }
+
         fsm.UpdateFSM(Detections, ref targetList);
         lineRenderer.SetPosition(0, transform.position);
-
+        if (targetList.Any()) stateValue = targetList.First().Value;
         Vector3 curentTarget = fsm.currentState.TraceTargetPosition();
         if (targetPosition != curentTarget)
         {
@@ -118,12 +135,6 @@ public class AI : CharacterBase
     }
     void UpdateColor()
     {
-        float stateValue = 0;
-        if (targetList.Any())
-        {
-            stateValue = targetList.First().Value;
-        }
-
         float t = Mathf.InverseLerp(0, fsm.chaseThreshold, stateValue);
 
         // 현재 색상에 빨간색 값을 더해주는 방식
@@ -144,4 +155,10 @@ public class AI : CharacterBase
         Gizmos.color = Color.red;
         Gizmos.DrawSphere(targetPosition, 1f);
     }
+}
+[Serializable]
+public class TransformFloatPair
+{
+    public Transform target;
+    public float value;
 }

@@ -35,12 +35,20 @@ public class Patrol : MoveBase
     {
         patrolIndex = FindClosestPoint(transform.position, patrolPoints);
         ai.SetTargetPosition(patrolPoints[patrolIndex]);
-        Debug.Log($"{transform.name} ���� ���� ����, ��ǥ: {patrolPoints[patrolIndex]}");
+        Debug.Log($"{transform.name} Patrol, Enter: {patrolPoints[patrolIndex]}");
     }
 
     public override void Execute()
     {
-        if (agent.remainingDistance - agent.stoppingDistance < 0.1f) ArriveTargetPosition();
+        if (!agent.pathPending && agent.hasPath && agent.pathStatus == NavMeshPathStatus.PathComplete)
+        {
+            // remainingDistance가 너무 작지 않고, 에이전트가 경로를 따라 움직이는 상태일 때만 실행
+            if (agent.remainingDistance - agent.stoppingDistance < 0.1f)
+            {
+                ArriveTargetPosition();
+            }
+        }
+
         foreach (var rule in fsm.FindStatetargetState(this))
         {
             if (rule.ExitCondition.ExitCondition())
@@ -49,22 +57,17 @@ public class Patrol : MoveBase
                 break; // 조건이 만족되면 반복 종료
             }
         }
-        // if (ai.targetList.Any() && ai.targetList.First().Value > fsm.chaseThreshold)
-        // {
-        //     Exit();
-        // }
     }
 
     public override void Exit(MoveBase newState)
     {
-        Debug.Log($"{transform.name} ���� ���� Ż��");
+        Debug.Log($"{transform.name} Patrol Exit");
         fsm.SetState(newState);
-        //fsm.SetState<Trace>();
     }
 
     public override void ArriveTargetPosition()
     {
-        Debug.Log($"{transform.name} ���� ��ǥ �缳��: {patrolPoints[patrolIndex]}");
+        Debug.Log($"{transform.name} Patrol Arrive: {patrolPoints[patrolIndex]}");
         patrolIndex = (patrolIndex + 1) % patrolPoints.Count;
     }
 

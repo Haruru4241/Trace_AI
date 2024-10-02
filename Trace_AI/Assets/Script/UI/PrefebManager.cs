@@ -7,6 +7,14 @@ public class PrefebManager : MonoBehaviour
     public ButtonController mapSizeController;
     public ButtonController maxDepthController;
 
+    public GameObject floorPrefab;
+    public GameObject wallPrefab;
+    public GameObject hallwayPrefab;
+    public GameObject doorPrefab;
+    public GameObject dummyPrefeb;
+    public GameObject coinPrefab;
+
+    public GameObject slowZonePrefeb;
     public List<GameObject> playerPrefebs;
 
     // AI 등장 갯수를 관리하는 버튼 컨트롤러 4개
@@ -31,17 +39,17 @@ public class PrefebManager : MonoBehaviour
 
         if (diff > 2)
         {
-            maxDepthController.SetValue(mapSizePower-2);
+            maxDepthController.SetValue(mapSizePower - 2);
         }
         else if (diff < 0) // 차이가 0보다 크면 mapSize를 내려야 함
         {
-            maxDepthController.SetValue(mapSizePower-2);
+            maxDepthController.SetValue(mapSizePower - 2);
         }
     }
 
     private void OnMaxDepthChanged(int newValue)
     {
-                int mapSizeValue = mapSizeController.GetValue();
+        int mapSizeValue = mapSizeController.GetValue();
         int maxDepthValue = maxDepthController.GetValue();
 
         // mapSizeValue를 2의 지수로 변환 (예: 32 -> 5, 64 -> 6, 128 -> 7)
@@ -52,7 +60,7 @@ public class PrefebManager : MonoBehaviour
 
         if (diff > 2)
         {
-            mapSizeController.SetValue((int)Mathf.Pow(2, maxDepthValue+2));
+            mapSizeController.SetValue((int)Mathf.Pow(2, maxDepthValue + 2));
         }
         else if (diff < 0) // 차이가 0보다 크면 mapSize를 내려야 함
         {

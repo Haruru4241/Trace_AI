@@ -38,12 +38,10 @@ public class Boundary : MoveBase
 
     public override void Enter()
     {
-        Debug.Log($"{transform.name} ��� ���� ����, ��ǥ: {targetPosition}");
+        Debug.Log($"{transform.name} Boundary, Enter: {targetPosition}");
         Vector2Int lastPosition = new Vector2Int((int)ai.targetList.First().Key.position.x, (int)ai.targetList.First().Key.position.z);
         UpdateWeightMap(WeightTableType.LastPosition, lastPosition, 3, 10, 0);
 
-        Debug.Log(WeightTableType.LastPosition);
-        weightTables[WeightTableType.LastPosition].PrintValues();
         ArriveTargetPosition();
     }
 
@@ -66,19 +64,12 @@ public class Boundary : MoveBase
                 break; // 조건이 만족되면 반복 종료
             }
         }
-
-        // if (ai.targetList.Any() && (ai.targetList.First().Value >= fsm.chaseThreshold
-        //     || ai.targetList.First().Value <= fsm.patrolThreshold))
-        // {
-        //     Exit();
-        // }
     }
 
     public override void Exit(MoveBase newState)
     {
-        Debug.Log($"{transform.name} ��� ���� Ż��");
+        Debug.Log($"{transform.name} Boundary Exit");
         fsm.SetState(newState);
-        //fsm.SetState<Patrol>();
     }
 
     public override void ArriveTargetPosition()
@@ -86,19 +77,12 @@ public class Boundary : MoveBase
         List<Vector2Int> endPoints = FindEndPointsBFS(CurrentPosition(), 4);
         foreach (var endPoint in endPoints) UpdateWeightMap(WeightTableType.EndPosition, endPoint, 1, 2, 0);
 
-        Debug.Log(WeightTableType.Visited);
-        weightTables[WeightTableType.Visited].PrintValues();
-        Debug.Log(WeightTableType.EndPosition);
-        weightTables[WeightTableType.EndPosition].PrintValues();
-
         Vector2Int bestEndPoint = FindBestEndPoint();
         targetPosition = new Vector3(bestEndPoint.x, 1, bestEndPoint.y);
 
         weightTables[WeightTableType.LastPosition].InitializeValues();
         weightTables[WeightTableType.Visited].InitializeValues();
         weightTables[WeightTableType.EndPosition].InitializeValues();
-
-        Debug.Log($"{transform.name} ��� ��ǥ �缳��: {targetPosition}");
     }
 
     public override Vector3 TraceTargetPosition()
@@ -206,14 +190,10 @@ public class Boundary : MoveBase
             }
         }
 
-        Debug.Log("finalWeightTable");
-        finalWeightTable.PrintValues();
-
         if (bestEndPoints.Count > 0)
         {
             int randomIndex = Random.Range(0, bestEndPoints.Count);
 
-            Debug.Log($"bestEndPoints {bestEndPoints.Count} {randomIndex}");
             return bestEndPoints[randomIndex];
         }
         return Vector2Int.zero;

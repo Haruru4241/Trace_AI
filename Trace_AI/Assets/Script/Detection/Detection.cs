@@ -5,8 +5,9 @@ using UnityEngine.AI;
 
 public abstract class Detection : MonoBehaviour
 {
-    [Tooltip("°¨ÁöÇÒ ¿ÀºêÁ§Æ® ·¹ÀÌ¾î ¼³Á¤")]
+    [Tooltip("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ï¿½ï¿½")]
     public LayerMask detectionLayerMask;
+    public float Range = 5;
 
     public virtual List<Transform> Detect() { return null; }
 }
