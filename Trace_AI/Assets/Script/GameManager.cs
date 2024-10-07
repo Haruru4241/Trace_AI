@@ -115,12 +115,16 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator GenerateMapCoroutine()
     {
-        gameClear();
+        // gameClear가 완전히 끝날 때까지 기다림
+        yield return StartCoroutine(GameClearCoroutine());
+
 
         // gameClear가 완전히 끝날 때까지 기다림
         yield return new WaitForEndOfFrame();
 
         mapMaker.Initialize();
+        mapMaker.SpawnRandomBlocks();
+
         cameraController.SetCamera(mapMaker.mapSize);
 
         foreach (var surface in navMeshSurfaces)
@@ -131,39 +135,81 @@ public class GameManager : MonoBehaviour
         isMapGenerated = true;
         islocated = true;
         PlaceEntities();
+
+        tooltipManager.ShowTooltip($"GenerateMap", null, Vector3.zero); // 스프라이트는 null로 설정
     }
 
-    public void gameClear()
+    // gameClear를 코루틴으로 변경
+    public IEnumerator GameClearCoroutine()
     {
         foreach (var surface in navMeshSurfaces)
         {
             surface.RemoveData();
+            yield return new WaitForEndOfFrame(); // 각 NavMeshSurface가 제거되는 시간을 고려
         }
 
         mapMaker.ClearMap();
         ClearEntity();
+
         isMapGenerated = false;
         islocated = false;
+
+        tooltipManager.ShowTooltip($"gameClear", null, Vector3.zero);
+
+        yield return null;  // 비동기 함수의 완료를 명시
     }
     public void GameStart()
+    {
+        StartCoroutine(GameStartCoroutine());
+    }
+
+    // GameStart 코루틴으로 비동기 처리
+    private IEnumerator GameStartCoroutine()
     {
         if (isMapGenerated && islocated)
         {
             foreach (var entity in generatedEntities)
             {
-                var Character = entity.GetComponent<CharacterBase>();
-                if (Character != null) Character.Initialize(); // 플레이어 초기화
+                var character = entity.GetComponent<CharacterBase>();
+                if (character != null)
+                {
+                    character.Initialize();
+                    yield return new WaitForEndOfFrame(); // 캐릭터 초기화 대기
+                }
             }
         }
+
+        tooltipManager.ShowTooltip($"GameStart", null, Vector3.zero);
+
+        yield return null;  // 비동기 함수 완료 명시
     }
     public void Relocation()
     {
+        StartCoroutine(RelocationCoroutine());
+    }
+
+    // Relocation 코루틴으로 비동기 처리
+    private IEnumerator RelocationCoroutine()
+    {
         if (isMapGenerated)
         {
-            ClearEntity();
-            PlaceEntities();
+            ClearEntity();  // 엔티티 제거
+            yield return StartCoroutine(PlaceEntitiesCoroutine());  // 엔티티 재배치 비동기 처리
+
+
+            mapMaker.SpawnRandomBlocks();
+
             islocated = true;
         }
+
+        tooltipManager.ShowTooltip($"Relocation", null, Vector3.zero);
+
+        yield return null;  // 비동기 함수 완료 명시
+    }
+    private IEnumerator PlaceEntitiesCoroutine()
+    {
+        PlaceEntities();
+        yield return null;  // 비동기 함수 완료 명시
     }
 
     public void ClearEntity()

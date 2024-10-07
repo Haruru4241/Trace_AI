@@ -7,22 +7,56 @@ using UnityEngine.AI;
 
 public class AI : CharacterBase
 {
-    public List<Detection> Detections;
+    [Header("Detection Settings")]
+    [Tooltip("List of all detection components associated with this AI")]
+    public List<Detection> Detections;  // 감지 컴포넌트 목록
 
-    public Dictionary<Transform, float> targetList = new Dictionary<Transform, float>();
+    [Space(10)]
+    [Header("Target and State Management")]
+    [Tooltip("Current list of targets and their respective distances")]
+    public Dictionary<Transform, float> targetList = new Dictionary<Transform, float>();  // 타겟과 거리 목록
 
-    public TransformFloatPair showtargetList = new TransformFloatPair();
-    public Vector3 targetPosition;
+    [Tooltip("Serialized version of target list for easier debugging or display")]
+    public TransformFloatPair showtargetList = new TransformFloatPair();  // 타겟 목록을 보여주기 위한 변수
 
-    Renderer AIrenderer;
-    NavMeshAgent m_Agent;
-    FSM fsm;
-    private bool isGameStarted = false;
-    LineRenderer lineRenderer;
-    GameObject targetSphere;  // 목표 구체를 필드로 저장
-    List<GameObject> entities = new List<GameObject>();
-    public float stateValue = 0f;
-    public ProjectorManager projectorManager;
+    [Tooltip("Position of the current target")]
+    public Vector3 targetPosition;  // 현재 타겟 위치
+
+    [Tooltip("Current state value of the AI")]
+    public float stateValue = 0f;  // AI 상태 값
+
+    [Space(10)]
+    [Header("AI Components")]
+    [Tooltip("Renderer component for the AI's visual representation")]
+    private Renderer AIrenderer;  // AI의 렌더러
+
+    [Tooltip("NavMeshAgent component for AI movement")]
+    private NavMeshAgent m_Agent;  // 네비게이션 에이전트
+
+    [Tooltip("Finite State Machine (FSM) controlling AI behavior")]
+    private FSM fsm;  // FSM 관리
+
+    [Tooltip("LineRenderer component for drawing paths or debugging AI behavior")]
+    private LineRenderer lineRenderer;  // 라인 렌더러 (디버깅 및 경로 표시용)
+
+    [Space(10)]
+    [Header("Target Visualization")]
+    [Tooltip("GameObject used to visually represent the current target")]
+    private GameObject targetSphere;  // 목표 구체를 시각적으로 표현
+
+    [Space(10)]
+    [Header("Entity Management")]
+    [Tooltip("List of entities interacting with this AI")]
+    private List<GameObject> entities = new List<GameObject>();  // 상호작용하는 엔티티 목록
+
+    [Tooltip("Reference to the Projector Manager used for visual effects")]
+    public ProjectorManager projectorManager;  // 프로젝터 매니저 참조
+
+    [Space(10)]
+    [Header("Game Control")]
+    [Tooltip("Indicates if the game has started for this AI")]
+    public bool isGameStarted = false;  // 게임이 시작되었는지 여부
+    
     public void Awake()
     {
         m_Agent = GetComponent<NavMeshAgent>();
@@ -46,6 +80,7 @@ public class AI : CharacterBase
         entities.Add(targetSphere);
 
         m_Agent.avoidancePriority = UnityEngine.Random.Range(1, 1000);
+        if (isGameStarted)Initialize();
     }
     public void ClearAI()
     {
@@ -105,13 +140,11 @@ public class AI : CharacterBase
 
     private void OnEnable()
     {
-        GameEventSystem.OnAiAdditionalEvent += UpdateColor;
         GameEventSystem.OnTargetDestroyed += HandleTargetDestroyed;
     }
 
     private void OnDisable()
     {
-        GameEventSystem.OnAiAdditionalEvent -= UpdateColor;
         GameEventSystem.OnTargetDestroyed -= HandleTargetDestroyed;
     }
 
@@ -132,22 +165,6 @@ public class AI : CharacterBase
         {
             targetList.Remove(e.Source);
         }
-    }
-    void UpdateColor()
-    {
-        float t = Mathf.InverseLerp(0, fsm.chaseThreshold, stateValue);
-
-        // 현재 색상에 빨간색 값을 더해주는 방식
-        Color currentColor = AIrenderer.material.color;
-        Color redValueToAdd = new Color(t, 0, 0); // 빨간색 채널만 추가
-        AIrenderer.material.color = currentColor + redValueToAdd;
-
-        // 색상이 1을 넘지 않도록 clamping 처리
-        AIrenderer.material.color = new Color(
-            Mathf.Clamp01(AIrenderer.material.color.r),
-            Mathf.Clamp01(AIrenderer.material.color.g),
-            Mathf.Clamp01(AIrenderer.material.color.b)
-        );
     }
 
     void OnDrawGizmos()

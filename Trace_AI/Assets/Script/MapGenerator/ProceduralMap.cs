@@ -27,9 +27,6 @@ public class ProceduralMap : MapGenerator
         }
 
         DrawMap();
-        SpawnRandomBlocks(BlockType.Floor, GameManager.Instance.prefebManager.dummyPrefeb, numberOfDummy);
-        SpawnRandomBlocks(BlockType.Floor, GameManager.Instance.prefebManager.slowZonePrefeb, numberOfSlowZone);
-        SpawnRandomBlocks(BlockType.Floor, GameManager.Instance.prefebManager.coinPrefab, numberOfCoins);
     }
 
     private List<BlockType>[,] InitializeMap(int size)

@@ -21,12 +21,9 @@ public class AggroDetection : Detection
     private void HandleAggroEvent(object sender, AggroSource e)
     {
         // 어그로 소스와 현재 위치 간 거리 계산
-        Transform source = e.source;
-
-        // 거리가 감지 목록에 추가
-        if (Vector3.Distance(transform.position, source.position) <= e.distance)
+        if (Vector3.Distance(transform.position, e.source.position) <= e.distance)
         {
-            detectedAggroSources.Add(source);
+            detectedAggroSources.Add(e.target);
         }
     }
 
@@ -48,10 +45,12 @@ public class AggroDetection : Detection
 public class AggroSource
 {
     public Transform source;
+    public Transform target;
     public float distance;
 
-    public AggroSource(Transform source, float distance)
+    public AggroSource(Transform target, Transform source, float distance)
     {
+        this.target = target;
         this.source = source;
         this.distance = distance;
     }

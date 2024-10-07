@@ -1,23 +1,34 @@
 using UnityEngine;
-using UnityEngine.AI;
 
-public class SlowZone1 : MonoBehaviour
+public class SlowZone : MonoBehaviour
 {
+    [Tooltip("Layer mask to determine which objects are affected by the slow zone")]
+    public LayerMask targetLayerMask;  // 슬로우 존의 영향을 받는 레이어
+    public float SlowValue=0.5f;
+
     private void OnTriggerEnter(Collider other)
     {
-        CharacterBase playerMovement = other.GetComponent<CharacterBase>();
-        if (playerMovement != null)
+        // 오브젝트의 레이어가 슬로우 존에 포함되는지 확인
+        if (((1 << other.gameObject.layer) & targetLayerMask) != 0)
         {
-            playerMovement.AddSpeedModifier(0.5f);
+            CharacterBase character = other.GetComponent<CharacterBase>();
+            if (character != null)
+            {
+                character.AddSpeedModifier(SlowValue);  // 속도 감소 적용
+            }
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        CharacterBase playerMovement = other.GetComponent<CharacterBase>();
-        if (playerMovement != null)
+        // 오브젝트의 레이어가 슬로우 존에 포함되는지 확인
+        if (((1 << other.gameObject.layer) & targetLayerMask) != 0)
         {
-            playerMovement.RemoveSpeedModifier(0.5f);
+            CharacterBase character = other.GetComponent<CharacterBase>();
+            if (character != null)
+            {
+                character.RemoveSpeedModifier(SlowValue);  // 속도 감소 해제
+            }
         }
     }
 }

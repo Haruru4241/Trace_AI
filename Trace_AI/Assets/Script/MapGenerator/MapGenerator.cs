@@ -46,6 +46,11 @@ public abstract class MapGenerator : MonoBehaviour
 
         return blocks;
     }
+    public void SpawnRandomBlocks(){
+        SpawnRandomBlocks(BlockType.Floor, GameManager.Instance.prefebManager.dummyPrefeb, GameManager.Instance.prefebManager.ObjCountControllers[0].GetValue());
+        SpawnRandomBlocks(BlockType.Floor, GameManager.Instance.prefebManager.slowZonePrefeb, GameManager.Instance.prefebManager.ObjCountControllers[1].GetValue());
+        SpawnRandomBlocks(BlockType.Floor, GameManager.Instance.prefebManager.coinPrefab, GameManager.Instance.prefebManager.ObjCountControllers[2].GetValue());
+    }
 
     public void SpawnRandomBlocks(BlockType type, GameObject blockToSpawn, int numberOfBlocksToSpawn)
     {

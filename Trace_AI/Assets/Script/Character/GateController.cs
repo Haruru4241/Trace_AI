@@ -8,7 +8,7 @@ public class GateController : MonoBehaviour, ITooltip, IInteractable
     public GameObject door; // 문 오브젝트
     public GameObject floor; // 바닥 오브젝트
 
-    private bool isOpen = false; // 문이 열려있는지 여부
+    public bool isOpen = false; // 문이 열려있는지 여부
     private bool isInteractable = true; // 상호작용 가능 여부
     public float openCloseDuration = 0.7f; // 문을 여닫는 데 걸리는 시간
     public NavMeshObstacle navMeshObstacle;
@@ -27,7 +27,7 @@ public class GateController : MonoBehaviour, ITooltip, IInteractable
         floorRenderer = floor.GetComponent<Renderer>();
         originalDoorColor = doorRenderer.material.color;
         originalFloorColor = floorRenderer.material.color;
-        ToggleGate(true);
+        ToggleGate(!isOpen);
     }
     public void Interact()
     {
@@ -75,7 +75,6 @@ public class GateController : MonoBehaviour, ITooltip, IInteractable
         isOpen = true;
         SetInteractable(true);
         navMeshObstacle.carving = false;
-        Debug.Log("문이 열렸습니다.");
 
     }
 
@@ -90,7 +89,6 @@ public class GateController : MonoBehaviour, ITooltip, IInteractable
         isOpen = false;
         SetInteractable(true);
         navMeshObstacle.carving = true;
-        Debug.Log("문이 닫혔습니다.");
     }
 
     // 일정 시간 동안 상호작용 불가하게 하는 메서드

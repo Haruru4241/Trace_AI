@@ -1,23 +1,43 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using OpenCover.Framework.Model;
 using UnityEngine;
 
 public class FSM : MonoBehaviour
 {
-    public float chaseThreshold = 100f;
-    public float patrolThreshold = 50f;
-    public float stateMaxValue = 200f;
+    [Header("State Settings")]
+    [Tooltip("Maximum value for the state system")]
+    public float stateMaxValue = 200f;  // 상태 시스템의 최대값
 
-    public List<MoveBase> availableStates = new List<MoveBase>();
-    public MoveBase currentState;
-    [SerializeField] private List<StateTransitionRule> stateTransitionRules;
-    public List<DetectionWeight> detectionWeightsList;
-    public List<LayerValue> layerValuesList;
+    [Tooltip("List of all possible states this AI can transition to")]
+    public List<MoveBase> availableStates = new List<MoveBase>();  // AI가 사용할 수 있는 상태 목록
 
-    private Dictionary<string, float> detectionWeights;
-    private Dictionary<string, float> layerValueDict;
+    [Tooltip("The current state the AI is in")]
+    public MoveBase currentState;  // AI의 현재 상태
+
+    [Space(10)]
+    [Header("State Transition Rules")]
+    [Tooltip("List of state transition rules that define how AI transitions between states")]
+    [SerializeField] private List<StateTransitionRule> stateTransitionRules;  // 상태 전이 규칙
+
+    [SerializeField] private MoveBase IndicateState;
+
+    [Space(10)]
+    [Header("Detection Weights and Layer Values")]
+    [Tooltip("List of detection weights that influence AI behavior")]
+    public List<DetectionWeight> detectionWeightsList;  // 감지 가중치 목록
+
+    [Tooltip("List of layer values that are used for layer-based AI behavior")]
+    public List<LayerValue> layerValuesList;  // 레이어 값 목록
+
+    [Space(10)]
+    [Header("Internal State Data")]
+    [Tooltip("Dictionary for storing detection weights dynamically")]
+    private Dictionary<string, float> detectionWeights;  // 감지 가중치 딕셔너리 (내부 용도)
+
+    [Tooltip("Dictionary for storing layer values dynamically")]
+    private Dictionary<string, float> layerValueDict;  // 레이어 값 딕셔너리 (내부 용도)
+
 
     public void Initialize()
     {
@@ -31,15 +51,18 @@ public class FSM : MonoBehaviour
         }
     }
 
-    public void SetState<T>() where T : MoveBase
-    {
-        currentState = availableStates.OfType<T>().FirstOrDefault();
-        currentState.Enter();
-    }
-
     public void SetState(MoveBase newState)
     {
         currentState = newState;
+        // 현재 상태가 지정된 상태와 동일하면 탈출 시 프로젝터 초기화
+        if (currentState == IndicateState)
+        {
+            newState.ai.projectorManager.ChangeAllProjectorsToChangedColor();  // 상태 진입 시 변경
+        }
+        else if (currentState != IndicateState)
+        {
+            newState.ai.projectorManager.ChangeAllProjectorsToInitialColor();  // 상태 탈출 시 초기화
+        }
         currentState.Enter();
     }
 
@@ -104,10 +127,6 @@ public class FSM : MonoBehaviour
     public List<StateTransitionRule> FindStatetargetState(MoveBase currentState)
     {
         return stateTransitionRules.Where(rule => rule.targetState == currentState).ToList();
-    }
-    public List<StateTransitionRule> FindStateescapeState(MoveBase currentState)
-    {
-        return stateTransitionRules.Where(rule => rule.escapeState == currentState).ToList();
     }
 
     public void UpdateFSM(List<Detection> Detections, ref Dictionary<Transform, float> targetList)

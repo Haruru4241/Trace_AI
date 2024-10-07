@@ -148,7 +148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1ee453cc9b891040b496739733635a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseMoveSpeed: 12
+  baseMoveSpeed: 5
   currentMoveSpeed: 1
   movementSounds:
   - {fileID: 8300000, guid: 9929892c95e88f24ea67533fdec16e2e, type: 3}

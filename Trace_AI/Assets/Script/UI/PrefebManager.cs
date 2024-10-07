@@ -19,6 +19,7 @@ public class PrefebManager : MonoBehaviour
 
     // AI 등장 갯수를 관리하는 버튼 컨트롤러 4개
     public List<PrefabCountButton> aiCountControllers;
+    public List<ButtonController> ObjCountControllers;
 
     private void Start()
     {

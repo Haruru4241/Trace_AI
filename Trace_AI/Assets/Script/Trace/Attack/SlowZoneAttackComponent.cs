@@ -2,13 +2,10 @@ using System.Linq;
 using UnityEngine;
 public class SlowZoneAttackComponent : AttackBase
 {
-    private GameObject slowZonePrefab;
     private GameObject currentSlowZone;
 
     private void Start()
     {
-        // PrefabManager에서 슬로우존 프리팹 가져오기
-        slowZonePrefab = GameManager.Instance.prefebManager.slowZonePrefeb;
     }
 
     public override void Attack(GameObject Target)
@@ -16,7 +13,8 @@ public class SlowZoneAttackComponent : AttackBase
         // 타겟 위치에 슬로우존 설치
         if (currentSlowZone == null)
         {
-            currentSlowZone = Instantiate(slowZonePrefab, transform.position, Quaternion.identity);
+            currentSlowZone = Instantiate(GameManager.Instance.prefebManager.slowZonePrefeb, Target.transform.position, Quaternion.identity);
+            GameManager.Instance.generatedEntities.Add(currentSlowZone);
             Debug.Log("슬로우존을 설치했습니다.");
         }
     }

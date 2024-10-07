@@ -4,7 +4,8 @@ using UnityEngine.AI;
 
 public abstract class MoveBase : MonoBehaviour
 {
-    protected AI ai;
+    [HideInInspector]
+    public AI ai;
     protected FSM fsm;
     protected NavMeshAgent agent;
     public int FindClosestPoint(Vector3 currentPosition, List<Vector3> points)

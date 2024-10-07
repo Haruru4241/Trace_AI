@@ -23,9 +23,9 @@ public static class GameEventSystem
         OnSoundDetected?.Invoke(null, new GameEventArgs(source));
     }
 
-    public static void RaiseAggroDetected(Transform source, float distance)
+    public static void RaiseAggroDetected(Transform target, Transform source, float distance)
     {
-        OnAggroDetected?.Invoke(null, new AggroSource(source, distance));
+        OnAggroDetected?.Invoke(null, new AggroSource(target, source, distance));
     }
 
     public static void RaiseTargetDestroyed(Transform source) // �ı� �̺�Ʈ �߻� �޼��� �߰�

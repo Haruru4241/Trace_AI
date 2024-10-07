@@ -8,7 +8,6 @@ public class Trace : MoveBase
     public override void Enter()
     {
         ai.SetTargetPosition(TraceTargetPosition());
-        ai.projectorManager.ChangeAllProjectorsToChangedColor();
         Debug.Log($"{transform.name} Trace, Enter: {ai.targetList.First().Key.name}");
     }
 
@@ -30,7 +29,6 @@ public class Trace : MoveBase
     public override void Exit(MoveBase newState)
     {
         Debug.Log($"{transform.name} Trace Exit");
-        ai.projectorManager.ChangeAllProjectorsToInitialColor();
         fsm.SetState(newState);
     }
 

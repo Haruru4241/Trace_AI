@@ -12,7 +12,7 @@ NavMeshProjectSettings:
   - name: Jump
     cost: 2
   - name: SlowZone
-    cost: 7
+    cost: 12
   - name: 
     cost: 1
   - name: 
@@ -69,7 +69,7 @@ NavMeshProjectSettings:
     cost: 1
   - name: 
     cost: 1
-  m_LastAgentTypeID: 1479372276
+  m_LastAgentTypeID: -1923039037
   m_Settings:
   - serializedVersion: 3
     agentTypeID: 0
@@ -163,7 +163,7 @@ NavMeshProjectSettings:
       m_Flags: 0
   m_SettingNames:
   - Humanoid
-  - New Agent
+  - Player Agent
   - Humanoid for Navigation Sample
   - Ogre for Navigation Sample
-  - New Agent 1
+  - AI Agent 1

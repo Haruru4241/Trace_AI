@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class SlowZone : MonoBehaviour
+public class SlowZone1 : MonoBehaviour
 {
     private void OnTriggerEnter(Collider other)
     {

@@ -3,6 +3,7 @@ using System.Linq;
 public class ChaseThresholdCondition : StateCondition
 {
     public float chaseThreshold;
+    [Tooltip("true면 이하, false면 이상")]
     public bool isBelow = false; // true면 이하, false면 이상 조건을 평가
     private AI ai;
 

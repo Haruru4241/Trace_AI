@@ -163,9 +163,9 @@ NavMeshAgent:
   m_AgentTypeID: 1479372276
   m_Radius: 0.5
   m_Speed: 1
-  m_Acceleration: 100
+  m_Acceleration: 1000
   avoidancePriority: 20
-  m_AngularSpeed: 1
+  m_AngularSpeed: 1080
   m_StoppingDistance: 0.3
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
@@ -186,17 +186,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 258aa9dfe4018dc4a9ee267e906b6f88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseMoveSpeed: 5
+  baseMoveSpeed: 2
   currentMoveSpeed: 1
   Detections:
   - {fileID: 8634950448478187696}
   - {fileID: 7201270850711105659}
+  - {fileID: 2457406481464820540}
   showtargetList:
     target: {fileID: 0}
     value: 0
   targetPosition: {x: 0, y: 0, z: 0}
   stateValue: 0
   projectorManager: {fileID: 7233509801144548828}
+  isGameStarted: 0
 --- !u!114 &7490451952631220377
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -209,8 +211,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b9234f2bc27596846b241c777a8d9f79, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  chaseThreshold: 100
-  patrolThreshold: 20
   stateMaxValue: 120
   availableStates:
   - {fileID: 1015402069172898902}
@@ -237,18 +237,19 @@ MonoBehaviour:
   - targetState: {fileID: 5376678566181861477}
     ExitCondition: {fileID: 7339768463556003250}
     escapeState: {fileID: 1312253729372268379}
+  IndicateState: {fileID: 5376678566181861477}
   detectionWeightsList:
   - detectionType: SoundDetection
     value: 90
   - detectionType: VisionDetection
-    value: 20
+    value: 3
   - detectionType: AggroDetection
     value: 120
   layerValuesList:
   - layerName: canDetect
     value: 1
   - layerName: Player
-    value: 0.05
+    value: 0.3
 --- !u!114 &1312253729372268379
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -261,6 +262,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 297f744f1837fdd428b9addae034eab6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ai: {fileID: 0}
 --- !u!114 &1015402069172898902
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -273,8 +275,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 223e4ff7cf31dd048a5acb93fffd1991, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ai: {fileID: 0}
   patrolPoints: []
-  RandomPoints: 4
+  RandomPoints: 6
   Color: {r: 0, g: 1, b: 0, a: 1}
 --- !u!114 &1668650737326912268
 MonoBehaviour:
@@ -288,6 +291,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24a9815018adb744085479082ca04435, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ai: {fileID: 0}
   weightTableTypes: []
 --- !u!114 &5376678566181861477
 MonoBehaviour:
@@ -301,6 +305,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe572e0d3a2ae684183fd802923f2dee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ai: {fileID: 0}
   attackComponent: {fileID: -6727852815321540387}
 --- !u!114 &-6727852815321540387
 MonoBehaviour:
@@ -314,7 +319,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed3e68bfb880fd34fad289731c2b4bdb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  aggroRadius: 10
+  aggroRadius: 100
   aiLayer:
     serializedVersion: 2
     m_Bits: 4096
@@ -333,7 +338,7 @@ MonoBehaviour:
   detectionLayerMask:
     serializedVersion: 2
     m_Bits: 3072
-  Range: 5
+  Range: 1
   gizmoColor: {r: 1, g: 0, b: 1, a: 1}
 --- !u!114 &7201270850711105659
 MonoBehaviour:
@@ -350,7 +355,7 @@ MonoBehaviour:
   detectionLayerMask:
     serializedVersion: 2
     m_Bits: 3072
-  Range: 5
+  Range: 4
   viewAngle: 80
   gizmoColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!114 &2457406481464820540
@@ -367,8 +372,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   detectionLayerMask:
     serializedVersion: 2
-    m_Bits: 0
-  Range: 5
+    m_Bits: 4294967295
+  Range: 0
   gizmoColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &7846280691696773328
 MonoBehaviour:
@@ -425,7 +430,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetTag: Player
-  detectionRange: 1.5
+  detectionRange: 4
   isOutOfRange: 0
 --- !u!114 &7339768463556003250
 MonoBehaviour:
