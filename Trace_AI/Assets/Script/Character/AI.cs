@@ -38,6 +38,8 @@ public class AI : CharacterBase
 
     [Tooltip("LineRenderer component for drawing paths or debugging AI behavior")]
     private LineRenderer lineRenderer;  // 라인 렌더러 (디버깅 및 경로 표시용)
+    private Coroutine lineRendererCoroutine;  // 코루틴을 저장할 변수
+    public float lineRendererduration=1.5f;
 
     [Space(10)]
     [Header("Target Visualization")]
@@ -56,7 +58,7 @@ public class AI : CharacterBase
     [Header("Game Control")]
     [Tooltip("Indicates if the game has started for this AI")]
     public bool isGameStarted = false;  // 게임이 시작되었는지 여부
-    
+
     public void Awake()
     {
         m_Agent = GetComponent<NavMeshAgent>();
@@ -80,7 +82,7 @@ public class AI : CharacterBase
         entities.Add(targetSphere);
 
         m_Agent.avoidancePriority = UnityEngine.Random.Range(1, 1000);
-        if (isGameStarted)Initialize();
+        if (isGameStarted) Initialize();
     }
     public void ClearAI()
     {
@@ -127,15 +129,37 @@ public class AI : CharacterBase
         if (targetPosition != curentTarget)
         {
             targetPosition = curentTarget;
-            lineRenderer.SetPosition(1, targetPosition);
+            // lineRenderer.SetPosition(1, targetPosition);
 
-            // 목표 구체 위치도 업데이트
-            targetSphere.transform.position = targetPosition;
+            // // 목표 구체 위치도 업데이트
+            // targetSphere.transform.position = targetPosition;
+            // 이전 코루틴이 실행 중이면 중지
+            if (lineRendererCoroutine != null)
+            {
+                StopCoroutine(lineRendererCoroutine);
+            }
+
+            // 새로운 목표 위치로 이동한 후 일정 시간 동안 유지하는 코루틴 실행
+            lineRendererCoroutine = StartCoroutine(UpdateLineRenderer(targetPosition, lineRendererduration));  // 1초 동안 유지
+
         }
 
         m_Agent.destination = targetPosition;
 
         GameEventSystem.RaiseAiAdditionalEvent();
+    }
+    // 라인 렌더러의 끝점 위치를 일정 시간 동안 유지하는 코루틴
+    private IEnumerator UpdateLineRenderer(Vector3 newTargetPosition, float duration)
+    {
+        // 목표 구체 위치 업데이트
+        targetSphere.transform.position = newTargetPosition;
+        lineRenderer.SetPosition(1, newTargetPosition);
+        
+        lineRenderer.enabled=true;
+        // 일정 시간 대기
+        yield return new WaitForSeconds(duration);
+
+        lineRenderer.enabled=false;
     }
 
     private void OnEnable()

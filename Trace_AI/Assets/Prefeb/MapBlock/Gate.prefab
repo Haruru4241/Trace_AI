@@ -50,7 +50,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   door: {fileID: 5347482061115000309}
   floor: {fileID: 1501820034524779495}
-  isOpen: 1
+  isOpen: 0
   openCloseDuration: 0.1
   navMeshObstacle: {fileID: 2748851241784899617}
   tooltipSprite: {fileID: 21300000, guid: 413a0f1048be77947b37333cb1667320, type: 3}

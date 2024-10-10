@@ -149,6 +149,7 @@ public class GameManager : MonoBehaviour
         }
 
         mapMaker.ClearMap();
+        collectedCoins=0;
         ClearEntity();
 
         isMapGenerated = false;
